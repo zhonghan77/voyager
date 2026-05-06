@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+<!-- Page Title Block -->
+{% block title %}Sign Up | Voyager - Create Your Travel Account{% endblock %}
+
+<!-- Body Class for Login/Register Page Styling -->
+{% block body_class %}login-body{% endblock %}
+
+{% block content %}
+<!-- REGISTRATION PAGE WRAPPER -->
+<div class="login-wrapper">
+    <!-- REGISTRATION FORM CONTAINER -->
+    <div class="form-container wide">
+        <!-- Form Header Section -->
+        <div class="form-header">
+            <h2>Create Account</h2>
+            <p>Start your intelligent travel journey today.</p>
+        </div>
+
+        <!-- REGISTRATION FORM -->
+        <!-- Submits to /register endpoint via POST -->
+        <form action="/register" method="POST" novalidate id="register-form">
+
+            <!-- USERNAME INPUT FIELD -->
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="e.g. john_traveler"
+                    required minlength="3" maxlength="50" autocomplete="username">
+                <small class="form-hint">3-50 characters, letters, numbers, underscore, and hyphen only</small>
+            </div>
+
+            <!-- EMAIL INPUT FIELD -->
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="name@example.com" required
+                    autocomplete="email">
+                <small class="form-hint">We'll never share your email</small>
+            </div>
+
+            <!-- PASSWORD INPUT FIELD -->
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" class="form-control"
+                        placeholder="Create a strong password" required minlength="8" autocomplete="new-password">
+                </div>
+
+                <!-- PASSWORD STRENGTH INDICATOR -->
+                <!-- Hidden by default, shown when user starts typing -->
+                <div class="password-strength-indicator" id="password-strength" style="display: none;">
+                    <!-- Visual Strength Bar -->
+                    <div class="strength-bar">
+                        <div class="strength-bar-fill" id="strength-bar-fill"></div>
+                    </div>
+
+                    <!-- Strength Label (Weak/Fair/Good/Strong) -->
+                    <p class="strength-text">Password strength: <span id="strength-label">Weak</span></p>
+
+                    <!-- Password Requirements Checklist -->
+                    <ul class="password-requirements">
+                        <!-- Minimum Length Requirement (8 characters) -->
+                        <li id="req-length">
+                            <i class="bi bi-x-circle"></i>
+                            <span>At least 8 characters</span>
+                        </li>
+                        <!-- Uppercase Letter Requirement -->
+                        <li id="req-uppercase">
+                            <i class="bi bi-x-circle"></i>
+                            <span>One uppercase letter (A-Z)</span>
+                        </li>
+                        <!-- Lowercase Letter Requirement -->
+                        <li id="req-lowercase">
+                            <i class="bi bi-x-circle"></i>
+                            <span>One lowercase letter (a-z)</span>
+                        </li>
+                        <!-- Number Requirement -->
+                        <li id="req-number">
+                            <i class="bi bi-x-circle"></i>
+                            <span>One number (0-9)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- CONFIRM PASSWORD INPUT FIELD -->
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control"
+                        placeholder="Repeat your password" required autocomplete="new-password">
+                </div>
+                <!-- Password Match Hint (hidden until user types) -->
+                <small class="form-hint" id="password-match-hint" style="display: none;"></small>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" class="btn btn-primary btn-login" id="submit-btn">
+                Create Account
+            </button>
+        </form>
+
+        <!-- FORM FOOTER -->
+        <!-- Link to login page for existing users -->
+        <div class="form-footer">
+            <p>Already have an account? <a href="/login" class="link-accent">Sign in</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

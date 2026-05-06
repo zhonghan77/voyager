@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+<!-- Page Title Block -->
+{% block title %}My Profile | Voyager{% endblock %}
+
+<!-- Body Class for Light Background -->
+{% block body_class %}bg-light{% endblock %}
+
+{% block content %}
+<!-- PROFILE PAGE CONTAINER -->
+<div class="container section" id="main-content">
+
+    <!-- PROFILE GRID LAYOUT: Sidebar + Main Content -->
+    <div class="profile-grid">
+
+        <!-- LEFT SIDEBAR: User Info and Settings -->
+        <aside class="profile-sidebar">
+            <!-- User Card with Avatar -->
+            <div class="user-card">
+                <div class="avatar-wrapper">
+                    <img src="{{ user.avatar }}?v={{ cache_buster }}" alt="Profile Picture" id="avatar-preview">
+
+                    <!-- Edit Avatar Button -->
+                    <button type="button" class="btn-icon-small edit-avatar-btn"
+                        onclick="document.getElementById('avatar-upload').click()" aria-label="Change profile picture">
+                        <i class="bi bi-camera-fill"></i>
+                    </button>
+                </div>
+
+                <h2>{{ user.username }}</h2>
+                <p class="user-email">{{ user.email }}</p>
+                <p class="user-bio">{{ user.bio }}</p>
+
+                <!-- Logout Button -->
+                <button type="button" class="btn btn-logout" onclick="showLogoutModal()" aria-label="Logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </div>
+
+            <!-- EDIT PROFILE SECTION -->
+            <div class="edit-profile-box">
+                <h3><i class="bi bi-pencil-square"></i> Edit Profile</h3>
+
+                <form action="/profile" method="POST" enctype="multipart/form-data" id="profile-form">
+
+                    <!-- Hidden File Input for Avatar Upload -->
+                    <label for="avatar-upload" class="visually-hidden">Upload profile picture</label>
+                    <input type="file" id="avatar-upload" name="avatar" accept="image/*"
+                        onchange="handleAvatarChange(this)">
+
+                    <!-- Display Name Input -->
+                    <div class="form-group-sm">
+                        <label for="username">Display Name</label>
+                        <input type="text" id="username" name="username" value="{{ user.username }}"
+                            class="form-control" required>
+                    </div>
+                    <!-- Email Input -->
+                    <div class="form-group-sm">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" class="form-control"
+                            required>
+                    </div>
+                    <!-- Bio Textarea -->
+                    <div class="form-group-sm">
+                        <label for="bio">Bio</label>
+                        <textarea id="bio" name="bio" rows="3" class="form-control">{{ user.bio }}</textarea>
+                    </div>
+                    <!-- Save Changes Button -->
+                    <button type="submit" class="btn btn-primary btn-full btn-sm">Save Changes</button>
+                </form>
+            </div>
+
+            <!-- PASSWORD CHANGE SECTION -->
+            <div class="edit-profile-box mt-profile">
+                <h3><i class="bi bi-shield-lock"></i> Change Password</h3>
+
+                <form action="/profile/change-password" method="POST" id="change-password-form">
+                    <!-- Current Password Input -->
+                    <div class="form-group-sm">
+                        <label for="current_password">Current Password</label>
+                        <input type="password" id="current_password" name="current_password" class="form-control"
+                            placeholder="Enter current password" required>
+                    </div>
+
+                    <!-- New Password Input with Strength Indicator -->
+                    <div class="form-group-sm">
+                        <label for="new_password">New Password</label>
+                        <input type="password" id="new_password" name="new_password" class="form-control"
+                            placeholder="Enter new password" required minlength="8">
+
+                        <!-- Password Strength Indicator -->
+                        <div class="password-strength-indicator" id="password-strength-profile">
+                            <div class="strength-bar">
+                                <div class="strength-bar-fill" id="strength-bar-fill-profile"></div>
+                            </div>
+                            <p class="strength-text">Password strength: <span id="strength-label-profile">Weak</span>
+                            </p>
+                            <!-- Password Requirements Checklist -->
+                            <ul class="password-requirements">
+                                <li id="req-length-profile">
+                                    <i class="bi bi-x-circle"></i>
+                                    <span>At least 8 characters</span>
+                                </li>
+                                <li id="req-uppercase-profile">
+                                    <i class="bi bi-x-circle"></i>
+                                    <span>One uppercase letter</span>
+                                </li>
+                                <li id="req-lowercase-profile">
+                                    <i class="bi bi-x-circle"></i>
+                                    <span>One lowercase letter</span>
+                                </li>
+                                <li id="req-number-profile">
+                                    <i class="bi bi-x-circle"></i>
+                                    <span>One number</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Confirm New Password Input -->
+                    <div class="form-group-sm">
+                        <label for="confirm_new_password">Confirm New Password</label>
+                        <input type="password" id="confirm_new_password" name="confirm_new_password"
+                            class="form-control" placeholder="Re-enter new password" required>
+                        <small class="form-hint" id="password-match-hint-profile"></small>
+                    </div>
+
+                    <!-- Update Password Button -->
+                    <button type="submit" class="btn btn-primary btn-full btn-sm" id="change-password-btn">
+                        <i class="bi bi-check-circle"></i> Update Password
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- RIGHT MAIN CONTENT: User's Trips and Favorites -->
+        <main class="profile-content">
+
+            <!-- MY GENERATED TRIPS SECTION -->
+            <section class="mb-5">
+                <div class="section-title-row">
+                    <h3><i class="bi bi-map-fill"></i> My Generated Trips</h3>
+                    <a href="/planner" class="btn-text">Create New <i class="bi bi-arrow-right"></i></a>
+                </div>
+
+                <div class="trip-list">
+                    <!-- Empty State Message -->
+                    {% if my_trips|length == 0 %}
+                    <p class="profile-empty-state">You haven't created any trips yet.</p>
+                    {% endif %}
+
+                    <!-- Trip Items List -->
+                    {% for trip in my_trips %}
+                    <div class="trip-item" data-trip-id="{{ trip.id }}">
+                        <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=200&auto=format&fit=crop"
+                            alt="Trip Thumb">
+                        <div class="trip-info">
+                            <h4>{{ trip.title }}</h4>
+                            <div class="trip-meta">
+                                <span><i class="bi bi-calendar3"></i> {{ trip.created_at.strftime('%Y-%m-%d')
+                                    }}</span>
+                                <span><i class="bi bi-geo-alt"></i> {{ trip.stops|length }} Stops</span>
+                                {% if trip.is_public %}
+                                <span class="status-public"><i class="bi bi-globe"></i> Public</span>
+                                {% else %}
+                                <span class="status-private"><i class="bi bi-lock"></i> Private</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="trip-item-actions">
+                            <a href="/route/{{ trip.id }}" class="btn btn-outline btn-sm">
+                                <span>View Details</span>
+                            </a>
+                            <button class="btn-icon-delete js-delete-trip" data-trip-id="{{ trip.id }}"
+                                title="Delete trip" aria-label="Delete trip">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- FAVORITE ROUTES SECTION -->
+            <section class="mb-5">
+                <div class="section-title-row">
+                    <h3><i class="bi bi-bookmark section-icon-bookmark"></i> Favorite Routes</h3>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Empty State Message -->
+                    {% if favorite_trips|length == 0 %}
+                    <p class="profile-no-favorites">No favorite routes yet.</p>
+                    {% endif %}
+
+                    <!-- Favorite Route Cards -->
+                    {% for trip in favorite_trips %}
+                    <article class="route-card compact-card" data-favorite-trip-id="{{ trip.id }}">
+                        <div class="card-image-wrapper card-image-wrapper-profile">
+                            <!-- Featured Route URL and Image Logic -->
+                            {% if trip.is_featured %}
+                            {% if trip.featured_key == 'route_1_london' %}
+                            {% set route_url = '/route/featured_1' %}
+                            {% set trip_image = url_for('static', filename='img/London_Architecture.avif')
+                            %}
+                            {% elif trip.featured_key == 'route_2_kyoto' %}
+                            {% set route_url = '/route/featured_2' %}
+                            {% set trip_image = url_for('static', filename='img/Kyoto_Streets.avif') %}
+                            {% elif trip.featured_key == 'route_3_paris' %}
+                            {% set route_url = '/route/featured_3' %}
+                            {% set trip_image = url_for('static', filename='img/Seine_River.jpg') %}
+                            {% else %}
+                            {% set route_url = '/route/' ~ trip.id %}
+                            {% set trip_image =
+                            'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=400&auto=format&fit=crop'
+                            %}
+                            {% endif %}
+                            {% else %}
+                            {% set route_url = '/route/' ~ trip.id %}
+                            {% set trip_image =
+                            'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=400&auto=format&fit=crop'
+                            %}
+                            {% endif %}
+
+                            <a href="{{ route_url }}">
+                                {% if trip.is_featured %}
+                                <img src="{{ trip_image }}" alt="{{ trip.title }}" loading="lazy">
+                                {% else %}
+                                <div class="card-placeholder-community">
+                                    <i class="bi bi-map"></i>
+                                </div>
+                                {% endif %}
+                            </a>
+                            <!-- Unfavorite Button -->
+                            <button class="btn-icon-delete-overlay js-unfavorite-trip" data-trip-id="{{ trip.id }}"
+                                title="Remove from favorites">
+                                <i class="bi bi-bookmark"></i>
+                            </button>
+                        </div>
+                        <div class="card-body p-3">
+                            <h4 class="card-title-profile">
+                                <a href="{{ route_url }}">{{ trip.title }}</a>
+                            </h4>
+                            <div class="card-meta">
+                                <span><i class="bi bi-geo-alt"></i> {{ trip.stops|length }} Stops</span>
+                                {% if trip.get_avg_rating() > 0 %}
+                                <span><i class="bi bi-star-fill section-icon-star"></i> {{ trip.get_avg_rating()
+                                    }}</span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ route_url }}" class="btn btn-outline btn-sm w-100 mt-2">
+                                </i> <span>View Details</span>
+                            </a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- SAVED DESTINATIONS SECTION -->
+            <section>
+                <div class="section-title-row">
+                    <h3><i class="bi bi-heart section-icon-heart"></i> Saved Destinations</h3>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Empty State Message -->
+                    {% if saved_destinations|length == 0 %}
+                    <p class="profile-no-favorites">No favorites yet.</p>
+                    {% endif %}
+
+                    <!-- Saved Destination Cards -->
+                    {% for dest in saved_destinations %}
+                    <article class="route-card compact-card" data-destination-id="{{ dest.id }}">
+                        <div class="card-image-wrapper card-image-wrapper-profile">
+                            <a href="/destination/{{ dest.id }}">
+                                <img src="{{ dest.image }}" alt="{{ dest.name }}">
+                            </a>
+                            <!-- Unfavorite Button -->
+                            <button class="btn-icon-delete-overlay js-unfavorite-destination"
+                                data-destination-id="{{ dest.id }}" title="Remove from favorites">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="card-body p-3">
+                            <h4 class="card-title-profile">
+                                <a href="/destination/{{ dest.id }}">{{ dest.name }}</a>
+                            </h4>
+                            <div class="card-meta">
+                                <span><i class="bi bi-geo-alt"></i> {{ dest.city }}</span>
+                            </div>
+                            <a href="/destination/{{ dest.id }}" class="btn btn-outline btn-sm w-100 mt-2">
+                                <span>View Details</span>
+                            </a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+
+        </main>
+    </div>
+</div>
+
+<!-- LOGOUT CONFIRMATION MODAL -->
+<div id="logout-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="logout-modal-title">
+    <div class="modal-content logout-modal">
+        <div class="modal-header">
+            <h3 id="logout-modal-title">
+                <i class="bi bi-box-arrow-right"></i> Confirm Logout
+            </h3>
+            <button type="button" class="modal-close" onclick="hideLogoutModal()" aria-label="Close modal">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to logout?</p>
+            <p class="text-secondary">
+                You can always sign back in anytime.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="hideLogoutModal()">
+                Cancel
+            </button>
+            <form action="/logout" method="POST">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

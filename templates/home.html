@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+<!-- Page Title Block -->
+{% block title %}Voyager - Intelligent Travel Route Planning & Trip Planner{% endblock %}
+
+<!-- Meta Description Block -->
+{% block meta_description %}Plan your perfect trip with Voyager's intelligent route optimization. Discover curated
+destinations, create custom itineraries, and share your travel experiences with the community.{% endblock %}
+
+<!-- SEO and Social Media Meta Tags -->
+{% block meta_tags %}
+<!-- Keywords for SEO -->
+<meta name="keywords"
+    content="travel planner, route optimization, trip planning, travel itinerary, vacation planner, travel routes">
+<meta name="author" content="Voyager">
+
+<!-- Open Graph Tags for Social Media Sharing -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://voyager.example.com/">
+<meta property="og:title" content="Voyager - Intelligent Travel Route Planning">
+<meta property="og:description"
+    content="Plan your perfect trip with advanced route optimization and curated destinations.">
+<meta property="og:image" content="{{ url_for('static', filename='img/og-image.jpg') }}">
+
+<!-- Twitter Card Tags -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://voyager.example.com/">
+<meta property="twitter:title" content="Voyager - Intelligent Travel Route Planning">
+<meta property="twitter:description" content="Plan your perfect trip with advanced route optimization.">
+<meta property="twitter:image" content="{{ url_for('static', filename='img/twitter-card.jpg') }}">
+
+<!-- Canonical URL -->
+<link rel="canonical" href="https://voyager.example.com/">
+
+<!-- Performance Optimization: Preconnect to External Resources -->
+<link rel="preconnect" href="https://images.unsplash.com">
+{% endblock %}
+
+{% block content %}
+<!-- BREADCRUMB NAVIGATION -->
+<nav class="breadcrumb-nav" aria-label="Breadcrumb">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/">
+                    <i class="bi bi-house-door" aria-hidden="true"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+        </ol>
+    </div>
+</nav>
+
+<!-- HERO SECTION -->
+<header class="hero" role="banner">
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="container hero-content">
+        <h1>The Art of <span class="highlight">Intelligent Travel</span></h1>
+
+        <p class="reveal-on-scroll effect-fade-up delay-short">
+            Stop planning, start exploring. Curate your perfect journey with our advanced route optimization
+            algorithm.
+        </p>
+
+        <!-- Call-to-Action Buttons -->
+        <div class="cta-group reveal-on-scroll effect-fade-up delay-medium">
+            <a href="/planner" class="btn btn-accent" aria-label="Start planning your route">
+                <i class="bi bi-magic" aria-hidden="true"></i> Generate My Route
+            </a>
+            <a href="/destinations" class="btn btn-outline" aria-label="Explore featured destinations">
+                <i class="bi bi-search" aria-hidden="true"></i> Explore Destinations
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN CONTENT AREA -->
+<main id="main-content-inner">
+    <!-- FEATURES SECTION -->
+    <section class="section features" aria-labelledby="features-heading">
+        <div class="container">
+            <!-- Section Header -->
+            <header class="section-header reveal-on-scroll effect-fade-up">
+                <h2 id="features-heading">Smart Planning Architecture</h2>
+                <p class="subtitle">Powered by advanced graph algorithms to save your time.</p>
+            </header>
+
+            <!-- Feature Cards Grid -->
+            <div class="grid-3">
+                <!-- Feature 1: Curated Databases -->
+                <article class="feature-card reveal-on-scroll effect-blur-in">
+                    <div class="icon-box" aria-hidden="true">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <h3>Curated Databases</h3>
+                    <p>Access thousands of verified landmarks with rich metadata, ensuring quality in every stop.
+                    </p>
+                </article>
+
+                <!-- Feature 2: Route Optimization -->
+                <article class="feature-card reveal-on-scroll effect-blur-in">
+                    <div class="icon-box" aria-hidden="true">
+                        <i class="bi bi-cpu-fill"></i>
+                    </div>
+                    <h3>Route Optimization</h3>
+                    <p>Our backend logic calculates the most efficient path between your chosen points using Nearest
+                        Neighbor analysis.</p>
+                </article>
+
+                <!-- Feature 3: Seamless Sharing -->
+                <article class="feature-card reveal-on-scroll effect-blur-in">
+                    <div class="icon-box" aria-hidden="true">
+                        <i class="bi bi-share-fill"></i>
+                    </div>
+                    <h3>Seamless Sharing</h3>
+                    <p>Create, save, and share your complex itineraries with a single link. Collaboration made easy.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- CURATED ITINERARIES SECTION -->
+    <section id="featured" class="section bg-light" aria-labelledby="itineraries-heading">
+        <div class="container">
+            <!-- Section Header -->
+            <header class="section-header reveal-on-scroll effect-fade-up">
+                <h2 id="itineraries-heading">Curated Itineraries</h2>
+                <p class="subtitle">Popular routes generated by our community and travel experts.</p>
+            </header>
+
+            <!-- Itinerary Cards Grid -->
+            <div class="grid-3">
+                <!-- Route 1: London Westminster Walk -->
+                <article class="route-card reveal-on-scroll effect-fade-up" aria-labelledby="route-1-title">
+                    <div class="card-image-wrapper">
+                        <img src="{{ url_for('static', filename='img/London_Architecture.avif') }}"
+                            alt="London Westminster landmarks including Big Ben" loading="lazy" width="400"
+                            height="220">
+                        <!-- Official Badge -->
+                        <span class="badge" aria-label="Official route">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i> Official
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Route Metadata: Location and Duration -->
+                        <div class="card-meta">
+                            <span><i class="bi bi-pin-map" aria-hidden="true"></i> London, UK</span>
+                            <span><i class="bi bi-clock" aria-hidden="true"></i> 6 Hours</span>
+                        </div>
+                        <h3 id="route-1-title">The Royal Westminster Walk</h3>
+                        <p class="description">A 6-stop royal tour featuring Big Ben, Westminster Abbey, and Buckingham
+                            Palace.
+                        </p>
+                        <a href="/route/featured_1" class="text-link"
+                            aria-label="View details for The Royal Westminster Walk">
+                            View Details <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Route 2: Kyoto Historic Highlights -->
+                <article class="route-card reveal-on-scroll effect-fade-up" aria-labelledby="route-2-title">
+                    <div class="card-image-wrapper">
+                        <img src="{{ url_for('static', filename='img/Kyoto_Streets.avif') }}"
+                            alt="Traditional streets of Kyoto with temples" loading="lazy" width="400" height="220">
+                        <!-- Official Badge -->
+                        <span class="badge" aria-label="Official route">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i> Official
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Route Metadata: Location and Duration -->
+                        <div class="card-meta">
+                            <span><i class="bi bi-pin-map" aria-hidden="true"></i> Kyoto, JP</span>
+                            <span><i class="bi bi-clock" aria-hidden="true"></i> 8 Hours</span>
+                        </div>
+                        <h3 id="route-2-title">Kyoto's Historic Highlights</h3>
+                        <p class="description">Explore Kyoto's soul through iconic shrines, historic slopes, and the
+                            atmospheric
+                            Gion district.
+                        </p>
+                        <a href="/route/featured_2" class="text-link"
+                            aria-label="View details for Kyoto's Historic Highlights">
+                            View Details <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Route 3: Paris Romantic Seine Evening -->
+                <article class="route-card reveal-on-scroll effect-fade-up" aria-labelledby="route-3-title">
+                    <div class="card-image-wrapper">
+                        <img src="{{ url_for('static', filename='img/Seine_River.jpg') }}"
+                            alt="Seine River in Paris with Eiffel Tower view" loading="lazy" width="400" height="220">
+                        <!-- Official Badge -->
+                        <span class="badge" aria-label="Official route">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i> Official
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Route Metadata: Location and Duration -->
+                        <div class="card-meta">
+                            <span><i class="bi bi-pin-map" aria-hidden="true"></i> Paris, FR</span>
+                            <span><i class="bi bi-clock" aria-hidden="true"></i> 5 Hours</span>
+                        </div>
+                        <h3 id="route-3-title">Romantic Seine Evening</h3>
+                        <p class="description">A magical evening walk along the Seine, connecting the Eiffel Tower to
+                            the
+                            illuminated Louvre.
+                        </p>
+                        <a href="/route/featured_3" class="text-link"
+                            aria-label="View details for Romantic Seine Evening">
+                            View Details <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </article>
+            </div>
+
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+<!-- Extra Scripts Block -->
+{% block scripts_extra %}
+<!-- Structured Data for SEO (Schema.org) -->
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Voyager",
+      "description": "Intelligent travel route planning and trip planner",
+      "url": "https://voyager.example.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://voyager.example.com/destinations?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+</script>
+{% endblock %}

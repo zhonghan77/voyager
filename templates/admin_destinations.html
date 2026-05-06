@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Destinations | Admin | Voyager{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <div class="admin-sidebar-title">
+                <i class="bi bi-shield-lock-fill"></i>
+                Admin Panel
+            </div>
+        </div>
+
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-item">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('admin_trips') }}" class="admin-nav-item">
+                <i class="bi bi-map-fill"></i>
+                <span>Trips</span>
+            </a>
+            <a href="{{ url_for('admin_destinations') }}" class="admin-nav-item active">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>Destinations</span>
+            </a>
+            <a href="{{ url_for('admin_reviews') }}" class="admin-nav-item">
+                <i class="bi bi-chat-square-text-fill"></i>
+                <span>Reviews</span>
+            </a>
+            <a href="{{ url_for('admin_logs') }}" class="admin-nav-item">
+                <i class="bi bi-file-text-fill"></i>
+                <span>Activity Logs</span>
+            </a>
+
+            <hr style="margin: 1.5rem 0; border-color: var(--border-color);">
+
+            <a href="{{ url_for('home') }}" class="admin-nav-item">
+                <i class="bi bi-arrow-left-circle"></i>
+                <span>Back to Site</span>
+            </a>
+        </nav>
+    </aside>
+    <main class="admin-content">
+        <div class="admin-table-container">
+            <div class="admin-table-header">
+                <h2 class="admin-table-title">Destinations</h2>
+                <div class="admin-table-actions">
+                    <form action="{{ url_for('admin_destinations') }}" method="GET" class="admin-search-box">
+                        <input type="text" name="q" class="admin-search-input" placeholder="Search..."
+                            value="{{ query }}">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Category</th>
+                        <th>Rating</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dest in destinations %}
+                    <tr>
+                        <td>
+                            <img src="{{ dest.image | image_url }}" class="trip-thumbnail"
+                                style="width:50px; height:35px;">
+                        </td>
+                        <td>
+                            <a href="{{ url_for('destination_detail', dest_id=dest.id) }}" target="_blank"
+                                style="font-weight:600; color:#0f172a; text-decoration:none;">
+                                {{ dest.name }}
+                            </a>
+                        </td>
+                        <td>{{ dest.city }}</td>
+                        <td><span class="badge-inactive">{{ dest.category }}</span></td>
+                        <td>
+                            <i class="bi bi-star-fill text-warning"></i> {{ dest.get_avg_rating() }}
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="btn-table-action" onclick="adminDeleteDest({{ dest.id }})"
+                                    title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </main>
+</div>
+{% endblock %}

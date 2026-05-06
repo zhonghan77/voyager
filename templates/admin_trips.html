@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Trip Management | Admin | Voyager{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <div class="admin-sidebar-title">
+                <i class="bi bi-shield-lock-fill"></i>
+                Admin Panel
+            </div>
+        </div>
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-item">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('admin_trips') }}" class="admin-nav-item active">
+                <i class="bi bi-map-fill"></i>
+                <span>Trips</span>
+            </a>
+            <a href="{{ url_for('admin_destinations') }}" class="admin-nav-item">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>Destinations</span>
+            </a>
+            <a href="{{ url_for('admin_reviews') }}" class="admin-nav-item">
+                <i class="bi bi-chat-square-text-fill"></i>
+                <span>Reviews</span>
+            </a>
+            <a href="{{ url_for('admin_logs') }}" class="admin-nav-item">
+                <i class="bi bi-file-text-fill"></i>
+                <span>Activity Logs</span>
+            </a>
+            <hr style="margin: 1.5rem 0; border-color: var(--border-color);">
+            <a href="{{ url_for('home') }}" class="admin-nav-item">
+                <i class="bi bi-arrow-left-circle"></i>
+                <span>Back to Site</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-table-container">
+            <div class="admin-table-header">
+                <h2 class="admin-table-title">Trip Management</h2>
+                <div class="admin-table-actions">
+                    <form action="{{ url_for('admin_trips') }}" method="GET" class="admin-search-box">
+                        <input type="hidden" name="status" value="{{ status }}">
+                        <input type="text" name="q" class="admin-search-input" placeholder="Search trips..."
+                            value="{{ query }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="filter-tabs">
+                <a href="{{ url_for('admin_trips', q=query, status='all') }}"
+                    class="filter-tab {{ 'active' if status == 'all' else '' }}">
+                    All Trips
+                </a>
+                <a href="{{ url_for('admin_trips', q=query, status='public') }}"
+                    class="filter-tab {{ 'active' if status == 'public' else '' }}">
+                    Public
+                </a>
+                <a href="{{ url_for('admin_trips', q=query, status='private') }}"
+                    class="filter-tab {{ 'active' if status == 'private' else '' }}">
+                    Private
+                </a>
+                <a href="{{ url_for('admin_trips', q=query, status='featured') }}"
+                    class="filter-tab {{ 'active' if status == 'featured' else '' }}">
+                    Featured
+                </a>
+            </div>
+
+            <div class="bulk-actions-bar" id="bulk-actions-bar">
+                <span id="selected-count">0 selected</span>
+                <button class="btn btn-sm btn-outline" onclick="bulkAction('make_public')">
+                    <i class="bi bi-globe"></i> Make Public
+                </button>
+                <button class="btn btn-sm btn-outline" onclick="bulkAction('make_private')">
+                    <i class="bi bi-lock"></i> Make Private
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="bulkAction('delete')">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell">
+                            <input type="checkbox" id="select-all">
+                        </th>
+                        <th>Trip</th>
+                        <th>Author</th>
+                        <th>Status</th>
+                        <th>Stops</th>
+                        <th>Created</th>
+                        <th>Engagement</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trip in trips %}
+                    <tr>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="trip-checkbox" value="{{ trip.id }}">
+                        </td>
+                        <td>
+                            <div class="trip-info-cell">
+                                {% if trip.is_featured %}
+                                <img src="{{ url_for('static', filename=trip.image) }}" alt="{{ trip.title }}"
+                                    class="trip-thumbnail">
+                                {% else %}
+                                <div class="trip-thumbnail"
+                                    style="background: var(--bg-secondary); display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-map" style="font-size: 1.5rem; color: var(--text-secondary);"></i>
+                                </div>
+                                {% endif %}
+                                <div class="trip-details">
+                                    <a href="{{ url_for('route_detail', trip_id=trip.id) }}" class="trip-title"
+                                        target="_blank">
+                                        {{ trip.title or trip.name or 'Untitled Trip' }}
+                                    </a>
+                                    <span class="trip-meta">
+                                        {% if trip.region %}{{ trip.region }}{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span style="font-weight: 500; color: var(--text-primary);">
+                                {{ trip.author.username }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if trip.is_featured %}
+                            <span class="badge-admin">Featured</span>
+                            {% elif trip.is_public %}
+                            <span class="badge-active">Public</span>
+                            {% else %}
+                            <span class="badge-inactive">Private</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ trip.stops | length }}
+                        </td>
+                        <td>
+                            {{ trip.created_at.strftime('%Y-%m-%d') }}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 0.75rem; font-size: 0.875rem;">
+                                <span title="Likes">
+                                    <i class="bi bi-heart-fill" style="color: var(--error);"></i>
+                                    {{ trip.get_likes_count() }}
+                                </span>
+                                <span title="Reviews">
+                                    <i class="bi bi-star-fill" style="color: #fbbf24;"></i>
+                                    {{ trip.reviews | length if trip.reviews else 0 }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="{{ url_for('route_detail', trip_id=trip.id) }}" class="btn-table-action"
+                                    title="View Trip" target="_blank">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button class="btn-table-action" title="Toggle Public/Private"
+                                    onclick="togglePublic({{ trip.id }})">
+                                    <i class="bi {{ 'bi-globe' if not trip.is_public else 'bi-lock' }}"></i>
+                                </button>
+                                <button class="btn-table-action" title="Toggle Featured"
+                                    onclick="toggleFeatured({{ trip.id }})"
+                                    style="color: {{ 'var(--accent)' if trip.is_featured else 'inherit' }};">
+                                    <i class="bi bi-star-fill"></i>
+                                </button>
+                                <button class="btn-table-action" title="Delete Trip"
+                                    onclick="deleteTrip({{ trip.id }}, '{{ trip.title or trip.name }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if pagination.pages > 1 %}
+            <div style="padding: 1.5rem; border-top: 1px solid var(--border-color);">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item {{ 'disabled' if not pagination.has_prev else '' }}">
+                            <a class="page-link"
+                                href="{{ url_for('admin_trips', page=pagination.prev_num, q=query, status=status) if pagination.has_prev else '#' }}">
+                                Previous
+                            </a>
+                        </li>
+                        {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                        <li class="page-item {{ 'active' if page_num == pagination.page else '' }}">
+                            <a class="page-link"
+                                href="{{ url_for('admin_trips', page=page_num, q=query, status=status) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                        {% endfor %}
+                        <li class="page-item {{ 'disabled' if not pagination.has_next else '' }}">
+                            <a class="page-link"
+                                href="{{ url_for('admin_trips', page=pagination.next_num, q=query, status=status) if pagination.has_next else '#' }}">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

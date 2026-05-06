@@ -1,0 +1,373 @@
+{
+  "route_1_london": {
+    "title": "The Royal Westminster Walk",
+    "region": "europe",
+    "description": "Historic walking tour through London's royal and political heart",
+    "total_stops": 6,
+    "estimated_duration": "6 hours",
+    "best_time": "Morning to afternoon, any season",
+    "stops": [
+      {
+        "name": "Big Ben & Palace of Westminster",
+        "city": "London",
+        "country": "United Kingdom",
+        "category": "Historical",
+        "lat": 51.5007,
+        "lon": -0.1246,
+        "description": "The Elizabeth Tower housing the famous Big Ben bell, part of the UNESCO World Heritage Palace of Westminster. The Gothic architecture dates from the 1834 rebuild after a fire destroyed the original 1040 palace.",
+        "visit_duration": "45 minutes",
+        "tips": [
+          "Best photographed from Westminster Bridge or Parliament Square",
+          "The tower contains 334 steps to reach the belfry",
+          "Big Ben refers to the bell, not the clock tower itself"
+        ],
+        "opening_hours": "Exterior viewing 24/7; interior tours require advance booking",
+        "admission": "Free (exterior); Tours £35-45 for UK residents only",
+        "transport": "Westminster Underground Station (Circle, District, Jubilee lines)"
+      },
+      {
+        "name": "Westminster Abbey",
+        "city": "London",
+        "country": "United Kingdom",
+        "category": "Historical",
+        "lat": 51.4994,
+        "lon": -0.1273,
+        "description": "A Gothic abbey church built by Edward the Confessor in 1065, site of royal coronations since 1066. Final resting place of monarchs, poets, and notable figures including Elizabeth I, Charles Darwin, and Isaac Newton.",
+        "visit_duration": "90 minutes",
+        "tips": [
+          "Book skip-the-line tickets online to avoid 1-2 hour queues",
+          "Visit Poets' Corner to see memorials to Shakespeare, Dickens, and Chaucer",
+          "The Coronation Chair has been used in every coronation since 1308",
+          "Audio guide included with admission"
+        ],
+        "opening_hours": "Monday-Friday 9:30am-3:30pm, Saturday 9:00am-1:00pm, Sunday worship only",
+        "admission": "Adults £29, Students £26, Children (6-17) £13",
+        "transport": "10-minute walk from Big Ben via Parliament Square"
+      },
+      {
+        "name": "Downing Street",
+        "city": "London",
+        "country": "United Kingdom",
+        "category": "Historical",
+        "lat": 51.5034,
+        "lon": -0.1276,
+        "description": "No. 10 Downing Street, the official residence and office of the British Prime Minister since 1735. View the famous black door from the security gates on Whitehall.",
+        "visit_duration": "15 minutes",
+        "tips": [
+          "Can only be viewed from Whitehall gates for security reasons",
+          "Best photo opportunities from the gates at the street entrance",
+          "Nearby is the Cenotaph war memorial"
+        ],
+        "opening_hours": "Exterior viewing only, 24/7",
+        "admission": "Free",
+        "transport": "5-minute walk from Westminster Abbey via Parliament Street"
+      },
+      {
+        "name": "Horse Guards Parade",
+        "city": "London",
+        "country": "United Kingdom",
+        "category": "Historical",
+        "lat": 51.5044,
+        "lon": -0.1272,
+        "description": "The official ceremonial entrance to St James's Palace and Buckingham Palace. Home to the Household Cavalry and site of the daily Changing of the Guard ceremony.",
+        "visit_duration": "30 minutes",
+        "tips": [
+          "Changing of the Guard: Mon-Sat at 11am, Sunday at 10am",
+          "Walk through the arches to see the parade ground",
+          "Free to watch mounted sentries",
+          "Churchill War Rooms museum nearby"
+        ],
+        "opening_hours": "24/7 access; Ceremony times vary",
+        "admission": "Free",
+        "transport": "3-minute walk from Downing Street via Whitehall"
+      },
+      {
+        "name": "Buckingham Palace",
+        "city": "London",
+        "country": "United Kingdom",
+        "category": "Historical",
+        "lat": 51.5014,
+        "lon": -0.1419,
+        "description": "The official London residence of the British monarch since 1837. The State Rooms are open to visitors during summer, and the Changing of the Guard ceremony attracts thousands daily.",
+        "visit_duration": "60-90 minutes",
+        "tips": [
+          "Changing of the Guard at 11am (check schedule - not daily)",
+          "Arrive 30 minutes early for good viewing positions",
+          "Best viewed from the Victoria Memorial in front",
+          "State Rooms open July-September only",
+          "The Royal Standard flag flies when the monarch is in residence"
+        ],
+        "opening_hours": "Exterior 24/7; State Rooms July-Sept 9:30am-7:30pm",
+        "admission": "Exterior free; State Rooms £30-33",
+        "transport": "15-minute walk through St James's Park from Horse Guards"
+      },
+      {
+        "name": "Trafalgar Square",
+        "city": "London",
+        "country": "United Kingdom",
+        "category": "Historical",
+        "lat": 51.5081,
+        "lon": -0.1281,
+        "description": "London's most famous public square, built to commemorate Admiral Nelson's 1805 victory at Trafalgar. Features Nelson's Column (169ft), four bronze lions, and the National Gallery.",
+        "visit_duration": "45 minutes",
+        "tips": [
+          "Climb the steps to the National Gallery for the best square views",
+          "The fountains send water jets 24 meters into the air",
+          "Four bronze lions by Sir Edwin Landseer guard Nelson's Column",
+          "Free WiFi available in the square",
+          "Regular cultural events and celebrations held here"
+        ],
+        "opening_hours": "24/7",
+        "admission": "Free",
+        "transport": "10-minute walk from Buckingham Palace via The Mall and Admiralty Arch"
+      }
+    ],
+    "route_notes": "This 6-hour walking tour covers approximately 4 miles through central London. The route connects via wide pedestrian-friendly streets and includes multiple rest opportunities. Suitable for all fitness levels. Best started at Westminster Underground Station in the morning to avoid peak crowds at Westminster Abbey.",
+    "local_transport": "All stops accessible via London Underground. Day travel cards recommended.",
+    "food_recommendations": [
+      "The Sanctuary House (traditional British pub near Westminster Abbey)",
+      "Café in the Crypt at St Martin-in-the-Fields (near Trafalgar Square)",
+      "The Admiralty (Trafalgar Square area)"
+    ]
+  },
+  "route_2_kyoto": {
+    "title": "Kyoto's Hidden Temples",
+    "region": "asia",
+    "description": "Serene temple exploration through Kyoto's historic Higashiyama district",
+    "total_stops": 5,
+    "estimated_duration": "8 hours",
+    "best_time": "Spring (cherry blossoms) or Autumn (fall foliage), early morning start recommended",
+    "stops": [
+      {
+        "name": "Fushimi Inari Taisha",
+        "city": "Kyoto",
+        "country": "Japan",
+        "category": "Historical",
+        "lat": 34.9671,
+        "lon": 135.7727,
+        "description": "The head shrine of over 30,000 Inari shrines across Japan, famous for its thousands of vermillion torii gates forming tunnels up Mount Inari. Dedicated to Inari, the Shinto god of rice, sake, and prosperity.",
+        "visit_duration": "2-3 hours",
+        "tips": [
+          "Arrive before 8am to avoid crowds on the lower trails",
+          "The full hike to summit is 4km and takes 2 hours round trip",
+          "Stop at Yotsutsuji intersection for panoramic Kyoto views",
+          "Free entry - donations welcome",
+          "Fox statues throughout (Inari's messengers)",
+          "Try local specialties: kitsune udon, inari sushi, grilled mochi"
+        ],
+        "opening_hours": "24/7 (main shrine hall 8:30am-4:30pm)",
+        "admission": "Free",
+        "transport": "JR Inari Station (5 min from Kyoto Station) or Keihan Fushimi-Inari Station"
+      },
+      {
+        "name": "Kiyomizu-dera Temple",
+        "city": "Kyoto",
+        "country": "Japan",
+        "category": "Historical",
+        "lat": 34.9949,
+        "lon": 135.785,
+        "description": "UNESCO World Heritage temple perched on a hillside, famous for its wooden stage jutting out 13 meters from the main hall, supported entirely without nails. Built in 778 CE and rebuilt in 1633.",
+        "visit_duration": "90 minutes",
+        "tips": [
+          "Walk up via Chawan-zaka (Teapot Lane) for charming shops",
+          "The wooden terrace offers spectacular city views",
+          "Drink from Otowa Waterfall's three streams (health, longevity, success)",
+          "Visit Jishu Shrine above for matchmaking deity",
+          "Special evening illuminations during sakura and autumn seasons",
+          "Expect crowds - one of Kyoto's most popular temples"
+        ],
+        "opening_hours": "6:00am-6:00pm (varies seasonally)",
+        "admission": "Adults ¥500 (~$3.50), Students ¥200",
+        "transport": "From Fushimi Inari: Keihan train to Kiyomizu-Gojo Station, then 20-min uphill walk"
+      },
+      {
+        "name": "Sannenzaka & Ninenzaka Streets",
+        "city": "Kyoto",
+        "country": "Japan",
+        "category": "Historical",
+        "lat": 34.9964,
+        "lon": 135.7805,
+        "description": "Charming preserved streets of traditional wooden machiya houses, teahouses, and artisan shops. Legend says falling on Sannenzaka brings three years of bad luck!",
+        "visit_duration": "45 minutes",
+        "tips": [
+          "Perfect for photography - especially early morning or evening",
+          "Many traditional craft shops selling ceramics, fans, and kimono accessories",
+          "Rental kimono shops for traditional photo opportunities",
+          "Watch your step on the stone slopes",
+          "Hidden cafés and tea houses throughout"
+        ],
+        "opening_hours": "Streets accessible 24/7; shops typically 10am-6pm",
+        "admission": "Free to walk",
+        "transport": "5-minute walk downhill from Kiyomizu-dera"
+      },
+      {
+        "name": "Yasaka Shrine",
+        "city": "Kyoto",
+        "country": "Japan",
+        "category": "Historical",
+        "lat": 35.0036,
+        "lon": 135.7786,
+        "description": "Important Shinto shrine marking the entrance to the Gion district. Famous for the Gion Matsuri festival (one of Japan's largest) held annually in July.",
+        "visit_duration": "30 minutes",
+        "tips": [
+          "Beautiful lantern-lit stage, especially stunning at dusk",
+          "Free entry to main shrine grounds",
+          "Adjacent Maruyama Park is Kyoto's oldest public park",
+          "Cherry blossom viewing spot in spring",
+          "Gateway to exploring Gion's geisha district"
+        ],
+        "opening_hours": "24/7",
+        "admission": "Free",
+        "transport": "10-minute walk from Ninenzaka through Higashiyama streets"
+      },
+      {
+        "name": "Gion District",
+        "city": "Kyoto",
+        "country": "Japan",
+        "category": "Historical",
+        "lat": 35.003,
+        "lon": 135.7751,
+        "description": "Kyoto's famous geisha district with traditional wooden machiya houses lining Hanamikoji Street. One of the few remaining places to see geiko and maiko (geisha and apprentice geisha).",
+        "visit_duration": "60-90 minutes",
+        "tips": [
+          "Best times to spot geiko/maiko: early evening (5-7pm) as they head to appointments",
+          "Walk along Hanamikoji Street and Shirakawa-dori",
+          "Visit Kennin-ji Temple (Kyoto's oldest Zen temple) nearby",
+          "Do not chase, touch, or block geiko/maiko for photos - be respectful",
+          "Explore Pontocho alley for traditional restaurants and atmosphere",
+          "Many high-end kaiseki restaurants and traditional ochaya (tea houses)"
+        ],
+        "opening_hours": "Streets 24/7; restaurants/shops vary",
+        "admission": "Free to walk",
+        "transport": "Adjacent to Yasaka Shrine; Gion-Shijo Station on Keihan Line"
+      }
+    ],
+    "route_notes": "This 8-hour route covers Kyoto's eastern highlights with moderate walking including uphill sections and stairs. Start early at Fushimi Inari (before 8am) to beat crowds. The route involves train transfers and significant walking through historic neighborhoods. Wear comfortable walking shoes. Spring cherry blossoms and autumn colors provide spectacular scenery.",
+    "local_transport": "Use Keihan train line between Fushimi Inari and Kiyomizu-Gojo. Consider IC card (ICOCA/Suica) for seamless transit.",
+    "food_recommendations": [
+      "Inari sushi and kitsune udon near Fushimi Inari",
+      "Traditional Kyoto cuisine (yudofu, obanzai) in Higashiyama",
+      "Matcha desserts throughout the route",
+      "Gion: upscale kaiseki or casual izakaya options"
+    ]
+  },
+  "route_3_paris": {
+    "title": "Romantic Seine Evening",
+    "region": "europe",
+    "description": "Evening stroll along the Seine from the Eiffel Tower to the Louvre at golden hour",
+    "total_stops": 5,
+    "estimated_duration": "5 hours",
+    "best_time": "Late afternoon to evening for golden hour and illuminated monuments",
+    "stops": [
+      {
+        "name": "Eiffel Tower",
+        "city": "Paris",
+        "country": "France",
+        "category": "Historical",
+        "lat": 48.8584,
+        "lon": 2.2945,
+        "description": "Paris's iconic 330-meter iron lattice tower built for the 1889 World's Fair. The most-visited paid monument in the world, offering spectacular views of the City of Light.",
+        "visit_duration": "90-120 minutes",
+        "tips": [
+          "Best views from Trocadéro Gardens across the Seine",
+          "Book summit tickets weeks in advance online",
+          "Hourly light show (sparkle) for 5 minutes after sunset",
+          "Three levels to explore - each with different perspectives",
+          "Visit at sunset for magical golden hour views",
+          "Champagne bar on top floor for special occasions"
+        ],
+        "opening_hours": "9:00am-12:45am (summer); 9:30am-11:45pm (winter)",
+        "admission": "Stairs €11-28, Elevator €17-35 depending on level",
+        "transport": "Métro Bir-Hakeim (Line 6) or Trocadéro (Line 9)"
+      },
+      {
+        "name": "Pont Alexandre III",
+        "city": "Paris",
+        "country": "France",
+        "category": "Historical",
+        "lat": 48.8638,
+        "lon": 2.3135,
+        "description": "Paris's most ornate bridge, built for the 1900 World Exhibition. Named after Tsar Alexander III of Russia, featuring gilded sculptures, art nouveau lamps, and stunning views of the Eiffel Tower and Grand Palais.",
+        "visit_duration": "20-30 minutes",
+        "tips": [
+          "One of the most photographed bridges in Paris",
+          "Four golden-winged horses (Fames) at each end",
+          "Best photos at golden hour",
+          "Walk slowly to appreciate the ornate lampposts and sculptures",
+          "Perfect spot for Eiffel Tower photos looking west"
+        ],
+        "opening_hours": "24/7",
+        "admission": "Free",
+        "transport": "30-minute walk along Seine from Eiffel Tower via Quai Branly and Quai d'Orsay"
+      },
+      {
+        "name": "Grand Palais & Petit Palais",
+        "city": "Paris",
+        "country": "France",
+        "category": "Museums",
+        "lat": 48.8661,
+        "lon": 2.3122,
+        "description": "Twin Beaux-Arts exhibition halls built for the 1900 Exposition Universelle. The Grand Palais features a stunning glass and iron dome; both host rotating art exhibitions and cultural events.",
+        "visit_duration": "30 minutes (exterior)",
+        "tips": [
+          "Grand Palais currently closed for renovation (reopening 2025)",
+          "Petit Palais museum is free for permanent collections",
+          "Beautiful architecture for photography, especially at dusk",
+          "Located on Avenue Winston Churchill between Pont Alexandre III and Champs-Élysées"
+        ],
+        "opening_hours": "Exterior viewing 24/7",
+        "admission": "Free (exterior)",
+        "transport": "Immediately adjacent to Pont Alexandre III"
+      },
+      {
+        "name": "Place de la Concorde",
+        "city": "Paris",
+        "country": "France",
+        "category": "Historical",
+        "lat": 48.8656,
+        "lon": 2.3212,
+        "description": "Paris's largest square, site of the French Revolution's guillotine where Louis XVI and Marie Antoinette were executed. Now features the 3,300-year-old Luxor Obelisk and ornate fountains.",
+        "visit_duration": "30 minutes",
+        "tips": [
+          "The 23-meter Egyptian obelisk dates from 1250 BCE",
+          "Two monumental fountains inspired by Rome's St. Peter's Square",
+          "Gateway to Champs-Élysées on one side, Tuileries on the other",
+          "Be careful crossing - very busy traffic circle",
+          "Beautiful illumination at night"
+        ],
+        "opening_hours": "24/7",
+        "admission": "Free",
+        "transport": "10-minute walk from Grand Palais via Avenue Winston Churchill"
+      },
+      {
+        "name": "Louvre Museum",
+        "city": "Paris",
+        "country": "France",
+        "category": "Museums",
+        "lat": 48.8606,
+        "lon": 2.3376,
+        "description": "The world's largest art museum and former royal palace, housing 38,000 works including the Mona Lisa, Venus de Milo, and Winged Victory. The iconic glass pyramid entrance was added in 1989.",
+        "visit_duration": "30-60 minutes (exterior evening visit)",
+        "tips": [
+          "Glass Pyramid beautifully illuminated after sunset",
+          "Courtyard free to enter and walk through",
+          "For museum visit: book timed entry tickets online weeks ahead",
+          "Exterior best photographed from Cour Napoleon",
+          "Walk through Jardin des Tuileries for Seine river views",
+          "Perfect ending point - well-connected by Métro"
+        ],
+        "opening_hours": "Courtyard 24/7; Museum Wed-Mon 9am-6pm (closed Tuesdays)",
+        "admission": "Courtyard free; Museum €22 (free first Sunday of month)",
+        "transport": "15-minute walk from Place de la Concorde through Tuileries Garden; Métro Palais Royal-Musée du Louvre (Lines 1, 7)"
+      }
+    ],
+    "route_notes": "This 5-hour romantic evening walk covers 3.5km (2.2 miles) along the Seine's right bank. Flat, easy terrain suitable for all fitness levels. Start at the Eiffel Tower in late afternoon (around 4-5pm) to catch golden hour and see monuments illuminated at dusk. The pathway along the Seine offers continuous beautiful views. Perfect for couples or anyone who loves photography.",
+    "local_transport": "Start: Métro Bir-Hakeim or Trocadéro. End: Métro Palais Royal-Musée du Louvre. Consider walking the entire route for the full romantic experience.",
+    "food_recommendations": [
+      "Carette at Place du Trocadéro (open until 11:30pm) for pastries",
+      "Café along Champs-Élysées for dinner with a view",
+      "Traditional bistros in the 7th arrondissement near Eiffel Tower",
+      "Picnic option: grab supplies and enjoy along Seine riverbanks"
+    ]
+  }
+}

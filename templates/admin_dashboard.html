@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | Voyager{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <div class="admin-sidebar-title">
+                <i class="bi bi-shield-lock-fill"></i>
+                Admin Panel
+            </div>
+        </div>
+
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-item active">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('admin_trips') }}" class="admin-nav-item">
+                <i class="bi bi-map-fill"></i>
+                <span>Trips</span>
+            </a>
+            <a href="{{ url_for('admin_destinations') }}" class="admin-nav-item">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>Destinations</span>
+            </a>
+            <a href="{{ url_for('admin_reviews') }}" class="admin-nav-item">
+                <i class="bi bi-chat-square-text-fill"></i>
+                <span>Reviews</span>
+            </a>
+            <a href="{{ url_for('admin_logs') }}" class="admin-nav-item">
+                <i class="bi bi-file-text-fill"></i>
+                <span>Activity Logs</span>
+            </a>
+
+            <hr style="margin: 1.5rem 0; border-color: var(--border-color);">
+
+            <a href="{{ url_for('home') }}" class="admin-nav-item">
+                <i class="bi bi-arrow-left-circle"></i>
+                <span>Back to Site</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <h1>Dashboard Overview</h1>
+            <p>Welcome back, {{ current_user.username }}! Here's what's happening today.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-value">{{ stats.total_trips }}</div>
+                        <div class="stat-card-label">Total Trips</div>
+                    </div>
+                    <div class="stat-card-icon green">
+                        <i class="bi bi-map-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-card-trend up">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>+{{ stats.new_trips_today }} today</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-value">{{ stats.total_destinations }}</div>
+                        <div class="stat-card-label">Destinations</div>
+                    </div>
+                    <div class="stat-card-icon purple">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-value">{{ stats.total_reviews + stats.total_trip_reviews }}</div>
+                        <div class="stat-card-label">Total Reviews</div>
+                    </div>
+                    <div class="stat-card-icon orange">
+                        <i class="bi bi-chat-square-text-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card" style="grid-column: span 2;">
+                <div class="chart-card-header">
+                    <h3 class="chart-card-title">Trip Creation (Last 30 Days)</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="tripChart" data-chart-data='{{ trip_chart_data | tojson }}'></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="activity-card">
+            <h3 class="chart-card-title" style="margin-bottom: 1.5rem;">Recent Admin Actions</h3>
+            <ul class="activity-list">
+                {% if stats.recent_admin_actions %}
+                {% for log in stats.recent_admin_actions[:10] %}
+                <li class="activity-item">
+                    <div class="activity-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">
+                            {{ log.admin.username }} performed {{ log.action_type }} on {{ log.target_type }}
+                        </div>
+                        <div class="activity-time">
+                            {{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+                {% else %}
+                <li class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-title">No recent activity</div>
+                    </div>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{{ url_for('admin_trips') }}" class="quick-action-btn">
+                <i class="bi bi-map"></i>
+                <div>Review Trips</div>
+            </a>
+            <a href="{{ url_for('admin_logs') }}" class="quick-action-btn">
+                <i class="bi bi-file-text"></i>
+                <div>View Logs</div>
+            </a>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+<!-- Page Title Block -->
+{% block title %}Destinations | Voyager{% endblock %}
+
+{% block content %}
+<!-- SEARCH HEADER SECTION -->
+<header class="search-header">
+    <div class="container">
+        <h1>Explore Landmarks</h1>
+        <p>Find the perfect stops for your next journey.</p>
+
+        <!-- Search Form -->
+        <form action="/destinations" method="GET" class="search-box">
+            <!-- Hidden fields to preserve current filters -->
+            <input type="hidden" name="category" value="{{ active_category }}">
+            <input type="hidden" name="country" value="{{ current_country }}">
+
+            <label for="search" class="visually-hidden">Search destinations</label>
+            <input type="text" id="search" name="q" class="search-input" placeholder="Search by city (e.g., London)..."
+                value="{{ search_query }}">
+
+            <button type="submit" class="search-btn" aria-label="Search destinations">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
+    </div>
+</header>
+
+<!-- MAIN CONTENT AREA -->
+<main class="section">
+    <div class="container">
+
+        <!-- PERSONALIZED RECOMMENDATIONS SECTION -->
+        <!-- Only visible to authenticated users -->
+        {% if current_user.is_authenticated %}
+        <section class="recommendations-section">
+            <div class="rec-header">
+                <div class="rec-title-group">
+                    <h2 id="rec-title">
+                        <i class="bi bi-stars"></i> Recommended for You
+                    </h2>
+                    <p class="subtitle" id="rec-subtitle">
+                        <span class="loading-dots">
+                            <span>.</span><span>.</span><span>.</span>
+                        </span>
+                        Loading recommendations
+                    </p>
+                </div>
+                <!-- Refresh Button -->
+                <button class="btn btn-outline-dark btn-sm refresh-btn" onclick="refreshRecommendations()"
+                    id="refresh-btn" aria-label="Refresh recommendations">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Recommendations Grid (populated by JavaScript) -->
+            <div class="grid-3" id="recommendations-grid">
+                <div class="loading-placeholder">
+                    <div class="spinner-container">
+                        <div class="spinner"></div>
+                    </div>
+                    <p class="loading-text">Finding perfect destinations for you...</p>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- FILTERS TOOLBAR -->
+        <div class="filters-toolbar">
+            <!-- Category Filters -->
+            <div class="filter-group">
+                {% set base_params = 'q=' + search_query + '&country=' + current_country %}
+
+                <a href="/destinations?category=All&{{ base_params }}"
+                    class="btn btn-outline filter-btn {{ 'active' if active_category == 'All' else '' }}">All</a>
+
+                <a href="/destinations?category=Historical&{{ base_params }}"
+                    class="btn btn-outline filter-btn {{ 'active' if active_category == 'Historical' else '' }}">Historical</a>
+
+                <a href="/destinations?category=Nature&{{ base_params }}"
+                    class="btn btn-outline filter-btn {{ 'active' if active_category == 'Nature' else '' }}">Nature</a>
+
+                <a href="/destinations?category=Museums&{{ base_params }}"
+                    class="btn btn-outline filter-btn {{ 'active' if active_category == 'Museums' else '' }}">Museums</a>
+            </div>
+
+            <!-- Country Dropdown Filter -->
+            <div class="filter-group country-select-wrapper">
+                <form action="/destinations" method="GET" id="countryForm">
+                    <!-- Hidden fields to preserve search and category -->
+                    <input type="hidden" name="q" value="{{ search_query }}">
+                    <input type="hidden" name="category" value="{{ active_category }}">
+
+                    <select name="country" class="form-select filter-select"
+                        onchange="document.getElementById('countryForm').submit()">
+                        <option value="All">All Countries</option>
+                        {% for country in countries %}
+                        <option value="{{ country }}" {{ 'selected' if current_country==country else '' }}>
+                            {{ country }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- DESTINATIONS GRID -->
+        <div class="grid-3" id="destinations-grid">
+            <!-- No Results Message -->
+            {% if destinations|length == 0 %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem; color: var(--text-light);">
+                <h3><i class="bi bi-emoji-frown" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i> No
+                    results found.</h3>
+                <p>Try adjusting your search or filters.</p>
+                <a href="/destinations" class="btn btn-outline-dark mt-2">Clear All Filters</a>
+            </div>
+            {% endif %}
+
+            <!-- Destination Cards -->
+            {% for dest in destinations %}
+            <article class="route-card">
+                <div class="card-image-wrapper">
+                    <a href="/destination/{{ dest.id }}">
+                        <img src="{{ dest.image }}" alt="{{ dest.name }}" loading="lazy">
+                    </a>
+
+                    {% if current_user.is_authenticated %}
+                    <button class="btn-like js-like-btn {{ 'liked' if dest in current_user.favorites else '' }}"
+                        data-id="{{ dest.id }}"
+                        title="{{ 'Remove from favorites' if dest in current_user.favorites else 'Add to favorites' }}">
+                        <i class="bi {{ 'bi-heart-fill' if dest in current_user.favorites else 'bi-heart' }}"></i>
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Card Body Content -->
+                <div class="card-body">
+                    <!-- Destination Metadata: Location, Category, Rating -->
+                    <div class="card-meta">
+                        <span><i class="bi bi-geo-alt"></i> {{ dest.city }}</span>
+                        <span><i class="bi bi-tag"></i> {{ dest.category }}</span>
+                        <span><i class="bi bi-star-fill" style="color: var(--star-color);"></i> {{ dest.get_avg_rating()
+                            }}</span>
+                    </div>
+
+                    <!-- Destination Name (linked) -->
+                    <h3><a href="/destination/{{ dest.id }}">{{ dest.name }}</a></h3>
+
+                    <!-- Destination Description -->
+                    <p class="description">{{ dest.desc }}</p>
+
+                    <!-- Action Buttons -->
+                    <div class="card-actions">
+                        {% if current_user.is_authenticated %}
+                        <!-- Add to Plan Button (authenticated users) -->
+                        <button class="btn btn-card-action js-add-to-plan" data-id="{{ dest.id }}"
+                            data-name="{{ dest.name }}" data-lat="{{ dest.lat }}" data-lon="{{ dest.lon }}">
+                            <i class="bi bi-plus-circle"></i> <span>Add to Plan</span>
+                        </button>
+                        {% else %}
+                        <!-- Login Prompt (guest users) -->
+                        <a href="{{ url_for('login', next=request.path) }}" class="btn btn-card-action">
+                            <i class="bi bi-box-arrow-in-right"></i> Login to Plan
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+
+        <!-- PAGINATION CONTROLS -->
+        {% if pagination.pages > 1 %}
+        <nav aria-label="Page navigation" class="pagination-container">
+            <ul class="pagination">
+                {% set nav_params = 'q=' + search_query + '&category=' + active_category + '&country=' + current_country
+                %}
+
+                <!-- Previous Page Button -->
+                <li class="page-item {{ 'disabled' if not pagination.has_prev else '' }}">
+                    <a class="page-link"
+                        href="{{ '/destinations?page=' ~ (pagination.prev_num) ~ '&' ~ nav_params if pagination.has_prev else '#' }}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+
+                <!-- Page Numbers -->
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                <li class="page-item {{ 'active' if page_num == pagination.page else '' }}">
+                    <a class="page-link" href="/destinations?page={{ page_num }}&{{ nav_params }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+                {% endfor %}
+
+                <!-- Next Page Button -->
+                <li class="page-item {{ 'disabled' if not pagination.has_next else '' }}">
+                    <a class="page-link"
+                        href="{{ '/destinations?page=' ~ (pagination.next_num) ~ '&' ~ nav_params if pagination.has_next else '#' }}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+    </div>
+</main>
+{% endblock %}
+
+<!-- Extra Scripts Block -->
+{% block scripts_extra %}
+<!-- Recommendations Engine JavaScript -->
+<script src="{{ url_for('static', filename='recommendations.js') }}"></script>
+{% endblock %}

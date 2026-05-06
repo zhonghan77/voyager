@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+<!-- Page Title Block -->
+{% block title %}Community Hub | Voyager{% endblock %}
+
+{% block body_class %}bg-light{% endblock %}
+
+{% block content %}
+<!-- Community Header Section -->
+<header class="search-header" style="padding: 4rem 0;">
+    <div class="container">
+        <h1>Voyager Community</h1>
+        <p>Discover itineraries crafted by fellow travelers. Fork them to make them your own.</p>
+    </div>
+</header>
+
+<!-- Main Content Area -->
+<main class="section">
+    <div class="container">
+        <!-- Trip Cards Grid (3 columns) -->
+        <div class="grid-3">
+            {% for trip in trips %}
+            <article class="route-card">
+                <!-- Card Image/Thumbnail Section -->
+                <div class="card-image-wrapper">
+                    {% if trip.is_featured %}
+                    <!-- Featured Routes: Use featured_N URL format -->
+                    {% if trip.featured_key == 'route_1_london' %}
+                    {% set route_url = '/route/featured_1' %}
+                    {% elif trip.featured_key == 'route_2_kyoto' %}
+                    {% set route_url = '/route/featured_2' %}
+                    {% elif trip.featured_key == 'route_3_paris' %}
+                    {% set route_url = '/route/featured_3' %}
+                    {% else %}
+                    {% set route_url = '/route/' ~ trip.id %}
+                    {% endif %}
+
+                    <a href="{{ route_url }}">
+                        <img src="{{ url_for('static', filename=trip.image) }}" alt="{{ trip.title }}" loading="lazy">
+                    </a>
+
+                    <!-- Official Badge (Top Right Corner) -->
+                    <span class="badge">
+                        <i class="bi bi-star-fill"></i> Official
+                    </span>
+                    {% else %}
+                    <!-- User Trips: Show Fixed Cover Image -->
+                    <a href="/route/{{ trip.id }}" aria-label="View details for {{ trip.title }}">
+                        <img src="{{ url_for('static', filename='img/community.avif') }}" alt="{{ trip.title }}"
+                            loading="lazy">
+                    </a>
+
+                    <!-- User Badge for Non-Featured Trips -->
+                    <span class="badge user-badge">
+                        <i class="bi bi-person-fill"></i> User Pick
+                    </span>
+                    {% endif %}
+
+                    <!-- Like and Favorite Action Buttons (Bottom Left) -->
+                    <!-- Only visible to authenticated users -->
+                    {% if current_user.is_authenticated %}
+                    <div class="card-action-buttons-community">
+                        <!-- Like Button -->
+                        <button
+                            class="btn-icon-community js-trip-like-btn {{ 'liked' if trip.is_liked_by(current_user) else '' }}"
+                            data-trip-id="{{ trip.id }}"
+                            title="{{ 'Unlike' if trip.is_liked_by(current_user) else 'Like this trip' }}">
+                            <i class="bi {{ 'bi-heart-fill' if trip.is_liked_by(current_user) else 'bi-heart' }}"></i>
+                        </button>
+
+                        <!-- Favorite/Bookmark Button -->
+                        <button
+                            class="btn-icon-community js-trip-favorite-btn {{ 'favorited' if trip.is_favorited_by(current_user) else '' }}"
+                            data-trip-id="{{ trip.id }}"
+                            title="{{ 'Remove from favorites' if trip.is_favorited_by(current_user) else 'Save to favorites' }}">
+                            <i
+                                class="bi {{ 'bi-bookmark-fill' if trip.is_favorited_by(current_user) else 'bi-bookmark' }}"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Card Body Content -->
+                <div class="card-body">
+                    <!-- Trip Metadata: Date and Number of Stops -->
+                    <div class="card-meta">
+                        <span><i class="bi bi-calendar3"></i> {{ trip.created_at.strftime('%Y-%m-%d') }}</span>
+                        <span><i class="bi bi-geo-alt-fill"></i> {{ trip.stops|length }} Stops</span>
+                    </div>
+
+                    <!-- Trip Title -->
+                    <h3>{{ trip.title }}</h3>
+
+                    <!-- Author Information -->
+                    <div class="author-info-community">
+                        <i class="bi bi-person-circle"></i>
+                        <span>
+                            {% if trip.is_featured %}
+                            Voyager Official
+                            {% else %}
+                            {{ trip.author.username }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Trip Statistics: Rating and Likes -->
+                    {% if trip.get_avg_rating() > 0 or trip.get_likes_count() > 0 %}
+                    <div class="trip-stats-community">
+                        <!-- Average Rating Display -->
+                        {% if trip.get_avg_rating() > 0 %}
+                        <div class="stat-item-community">
+                            <i class="bi bi-star-fill"></i>
+                            <span>{{ trip.get_avg_rating() }}</span>
+                            <span class="stat-count-community">({{ trip.reviews|length }})</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Likes Count Display -->
+                        {% if trip.get_likes_count() > 0 %}
+                        <div class="stat-item-community">
+                            <i class="bi bi-heart-fill"></i>
+                            <span>{{ trip.get_likes_count() }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Trip Description (Full Display) -->
+                    {% if trip.description %}
+                    <p class="description-full-community">{{ trip.description }}</p>
+                    {% elif trip.data %}
+                    {% set data_dict = trip.data|from_json %}
+                    {% if data_dict.get('description') %}
+                    <p class="description-full-community">{{ data_dict.get('description') }}</p>
+                    {% endif %}
+                    {% endif %}
+
+                    <!-- Action Buttons: View Details and Fork -->
+                    <div class="card-actions-original">
+                        <!-- View Details Button -->
+                        {% if trip.is_featured %}
+                        <a href="{{ route_url }}" class="btn btn-outline btn-sm" style="flex: 1;">
+                            View Details
+                        </a>
+                        {% else %}
+                        <a href="/route/{{ trip.id }}" class="btn btn-outline btn-sm" style="flex: 1;">
+                            View Details
+                        </a>
+                        {% endif %}
+
+                        <!-- Fork Button (Only for authenticated users viewing other users' trips or featured trips) -->
+                        {% if current_user.is_authenticated and (trip.is_featured or current_user.id != trip.author.id)
+                        %}
+                        <form action="/fork_trip/{{ 'featured_' ~ loop.index if trip.is_featured else trip.id }}"
+                            method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-git"></i> Fork
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+
+        <!-- Empty State Display (When No Trips Available) -->
+        {% if not trips %}
+        <div class="empty-state-community">
+            <i class="bi bi-map"></i>
+            <h3>No trips available yet</h3>
+            <p>Be the first to share your travel itinerary!</p>
+            {% if current_user.is_authenticated %}
+            <a href="/planner" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Create Trip
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

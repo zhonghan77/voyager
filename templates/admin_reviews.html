@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Reviews | Admin | Voyager{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <div class="admin-sidebar-title">
+                <i class="bi bi-shield-lock-fill"></i>
+                Admin Panel
+            </div>
+        </div>
+
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-item">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('admin_trips') }}" class="admin-nav-item">
+                <i class="bi bi-map-fill"></i>
+                <span>Trips</span>
+            </a>
+            <a href="{{ url_for('admin_destinations') }}" class="admin-nav-item">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>Destinations</span>
+            </a>
+            <a href="{{ url_for('admin_reviews') }}" class="admin-nav-item active">
+                <i class="bi bi-chat-square-text-fill"></i>
+                <span>Reviews</span>
+            </a>
+            <a href="{{ url_for('admin_logs') }}" class="admin-nav-item">
+                <i class="bi bi-file-text-fill"></i>
+                <span>Activity Logs</span>
+            </a>
+
+            <hr style="margin: 1.5rem 0; border-color: var(--border-color);">
+
+            <a href="{{ url_for('home') }}" class="admin-nav-item">
+                <i class="bi bi-arrow-left-circle"></i>
+                <span>Back to Site</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-table-container">
+            <div class="admin-table-header">
+                <h2 class="admin-table-title">User Reviews</h2>
+                <form action="{{ url_for('admin_reviews') }}" method="GET" class="admin-search-box">
+                    <input type="text" name="q" class="admin-search-input" placeholder="Search content..."
+                        value="{{ query }}">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                </form>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Destination</th>
+                        <th>Rating</th>
+                        <th>Comment</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for review in reviews %}
+                    <tr>
+                        <td>{{ review.user.username }}</td>
+                        <td>
+                            <a href="{{ url_for('destination_detail', dest_id=review.destination.id) }}"
+                                target="_blank">
+                                {{ review.destination.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <i class="bi bi-star-fill" style="color:orange;"></i> {{ review.rating }}
+                        </td>
+                        <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            {{ review.comment }}
+                        </td>
+                        <td>{{ review.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <button class="btn-table-action" onclick="deleteAdminReview({{ review.id }})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}

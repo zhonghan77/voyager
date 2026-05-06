@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+
+{% block title %}Trip Planner | Voyager{% endblock %}
+
+{% block body_class %}planner-body{% endblock %}
+
+{% block head_extra %}
+<!-- Leaflet CSS - CRITICAL: Must load before any JavaScript -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<!-- Amap JavaScript API v2.0 -->
+<style>
+    /* Ensure map container has proper dimensions */
+    #map {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Optional: Reduce Amap branding visibility */
+    .amap-logo {
+        opacity: 0.3 !important;
+    }
+
+    .amap-copyright {
+        opacity: 0.3 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="planner-layout">
+    <div class="planner-map-area" id="main-content">
+        <div id="map" aria-label="Interactive map for trip planning"></div>
+
+        <!-- Map Controls - Layer Switcher & POI Filters -->
+        <div class="map-controls-top-right">
+            <!-- Map Type Switcher -->
+            <div class="map-control-panel">
+                <div class="control-panel-header">
+                    <i class="bi bi-layers"></i>
+                    <span>Map Type</span>
+                    <i class="bi bi-chevron-up collapse-indicator"></i>
+                </div>
+                <div class="control-panel-content">
+                    <button class="map-layer-btn active" data-layer="standard" title="Standard Map">
+                        <i class="bi bi-map"></i>
+                        <span>Standard</span>
+                    </button>
+                    <button class="map-layer-btn" data-layer="satellite" title="Satellite View">
+                        <i class="bi bi-globe-americas"></i>
+                        <span>Satellite</span>
+                    </button>
+                    <button class="map-layer-btn" data-layer="terrain" title="Terrain Map">
+                        <i class="bi bi-mountain"></i>
+                        <span>Terrain</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- POI Filters Panel -->
+            <div class="map-control-panel">
+                <div class="control-panel-header">
+                    <i class="bi bi-funnel"></i>
+                    <span>Points of Interest</span>
+                    <i class="bi bi-chevron-up collapse-indicator"></i>
+                </div>
+                <div class="control-panel-content poi-filter-grid">
+                    <button class="poi-filter-btn" data-poi="attractions" title="Tourist Attractions">
+                        <i class="bi bi-camera"></i>
+                        <span>Attractions</span>
+                    </button>
+                    <button class="poi-filter-btn" data-poi="restaurants" title="Restaurants & Cafes">
+                        <i class="bi bi-cup-hot"></i>
+                        <span>Restaurants</span>
+                    </button>
+                    <button class="poi-filter-btn" data-poi="hotels" title="Hotels & Accommodation">
+                        <i class="bi bi-house-door"></i>
+                        <span>Hotels</span>
+                    </button>
+                    <button class="poi-filter-btn" data-poi="gas" title="Gas Stations">
+                        <i class="bi bi-fuel-pump"></i>
+                        <span>Gas Stations</span>
+                    </button>
+                    <button class="poi-filter-btn" data-poi="parking" title="Parking Areas">
+                        <i class="bi bi-p-square"></i>
+                        <span>Parking</span>
+                    </button>
+                    <button class="poi-filter-btn" data-poi="hospitals" title="Hospitals & Medical">
+                        <i class="bi bi-hospital"></i>
+                        <span>Medical</span>
+                    </button>
+                    <button class="poi-filter-btn" data-poi="shopping" title="Shopping Centers">
+                        <i class="bi bi-bag"></i>
+                        <span>Shopping</span>
+                    </button>
+                    <button class="poi-filter-btn" data-poi="banks" title="Banks & ATMs">
+                        <i class="bi bi-bank"></i>
+                        <span>Banks</span>
+                    </button>
+                </div>
+                <div class="poi-actions">
+                    <button class="btn-text-small" id="clear-poi-filters">
+                        <i class="bi bi-x-circle"></i> Clear All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-floating-bar">
+            <div class="route-stats-strip">
+                <div class="stat-pill">
+                    <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+                    <div class="stat-content">
+                        <span class="stat-label">Stops</span>
+                        <span class="stat-value" id="total-stops">0</span>
+                    </div>
+                </div>
+                <div class="stat-divider-vertical"></div>
+                <div class="stat-pill">
+                    <i class="bi bi-speedometer2" aria-hidden="true"></i>
+                    <div class="stat-content">
+                        <span class="stat-label">Dist</span>
+                        <span class="stat-value" id="total-distance">0 km</span>
+                    </div>
+                </div>
+                <div class="stat-divider-vertical"></div>
+                <div class="stat-pill">
+                    <i class="bi bi-clock-fill" aria-hidden="true"></i>
+                    <div class="stat-content">
+                        <span class="stat-label">Time</span>
+                        <span class="stat-value" id="total-duration">0h 0m</span>
+                    </div>
+                </div>
+                <div class="stat-divider-vertical"></div>
+                <div class="stat-pill">
+                    <i class="bi bi-calendar-event" aria-hidden="true"></i>
+                    <div class="stat-content">
+                        <span class="stat-label">Days</span>
+                        <span class="stat-value" id="total-days">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aside class="planner-sidebar" aria-label="Trip planning sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">
+                <i class="bi bi-map" aria-hidden="true"></i> Route Builder
+            </h2>
+            <button class="btn-icon" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-content">
+            <div class="trip-name-section">
+                <input type="text" id="trip-name" class="trip-name-input" placeholder="My Amazing Trip"
+                    value="My Road Trip" aria-label="Trip Name">
+                <button class="btn-icon-sm" id="edit-trip-name" title="Edit trip name" aria-label="Edit trip name">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="region-select">
+                    <i class="bi bi-globe-americas" aria-hidden="true"></i> Select Region
+                </label>
+                <select id="region-select" class="form-control form-select">
+                    <option value="world" data-lat="20" data-lon="0" data-zoom="2">All World</option>
+                    <optgroup label="Europe">
+                        <option value="europe" data-lat="54.5" data-lon="15.2" data-zoom="4">All Europe</option>
+                        <option value="uk" data-lat="54.5" data-lon="-4" data-zoom="6">United Kingdom</option>
+                        <option value="fr" data-lat="46.6" data-lon="2.2" data-zoom="6">France</option>
+                        <option value="de" data-lat="51.1" data-lon="10.4" data-zoom="6">Germany</option>
+                        <option value="it" data-lat="41.8" data-lon="12.5" data-zoom="6">Italy</option>
+                        <option value="es" data-lat="40.4" data-lon="-3.7" data-zoom="6">Spain</option>
+                    </optgroup>
+                    <optgroup label="Asia">
+                        <option value="asia" data-lat="34.0" data-lon="100.0" data-zoom="3">All Asia</option>
+                        <option value="jp" data-lat="36.2" data-lon="138.2" data-zoom="5">Japan</option>
+                        <option value="cn" data-lat="35.8" data-lon="104.1" data-zoom="4">China</option>
+                        <option value="th" data-lat="15.9" data-lon="101.0" data-zoom="6">Thailand</option>
+                        <option value="in" data-lat="20.6" data-lon="79.0" data-zoom="5">India</option>
+                    </optgroup>
+                    <optgroup label="North America">
+                        <option value="us" data-lat="37.0" data-lon="-95.7" data-zoom="4">United States</option>
+                        <option value="ca" data-lat="56.1" data-lon="-106.3" data-zoom="4">Canada</option>
+                        <option value="mx" data-lat="23.6" data-lon="-102.5" data-zoom="5">Mexico</option>
+                    </optgroup>
+                    <optgroup label="Oceania">
+                        <option value="au" data-lat="-25.2" data-lon="133.7" data-zoom="4">Australia</option>
+                        <option value="nz" data-lat="-40.9" data-lon="174.9" data-zoom="5">New Zealand</option>
+                    </optgroup>
+                    <optgroup label="South America">
+                        <option value="br" data-lat="-14.2" data-lon="-51.9" data-zoom="4">Brazil</option>
+                        <option value="ar" data-lat="-38.4" data-lon="-63.6" data-zoom="4">Argentina</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="location-input">Add Destination</label>
+                <div class="search-group">
+                    <input type="text" id="location-input" class="form-control"
+                        placeholder="Search cities, attractions, hotels..." aria-label="Search destination">
+                    <button id="add-btn" class="btn btn-primary btn-icon-only" aria-label="Add location to route">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="search-suggestions" id="search-suggestions"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="bi bi-bicycle" aria-hidden="true"></i> Transport Mode
+                </label>
+                <div class="transport-mode-selector" role="group" aria-label="Select transport mode">
+                    <button class="transport-mode-btn active" data-mode="driving-car" title="Driving"
+                        aria-pressed="true">
+                        <i class="bi bi-car-front-fill" aria-hidden="true"></i>
+                        <span>Drive</span>
+                    </button>
+                    <button class="transport-mode-btn" data-mode="cycling-regular" title="Cycling" aria-pressed="false">
+                        <i class="bi bi-bicycle" aria-hidden="true"></i>
+                        <span>Cycle</span>
+                    </button>
+                    <button class="transport-mode-btn" data-mode="foot-walking" title="Walking" aria-pressed="false">
+                        <i class="bi bi-person-walking" aria-hidden="true"></i>
+                        <span>Walk</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="view-mode-toggle">
+                <button class="view-mode-btn active" data-view="list">
+                    <i class="bi bi-list-ul" aria-hidden="true"></i> List View
+                </button>
+                <button class="view-mode-btn" data-view="timeline">
+                    <i class="bi bi-calendar-week" aria-hidden="true"></i> Timeline View
+                </button>
+            </div>
+
+            <div class="route-list-container" id="list-view">
+                <div class="list-header">
+                    <span class="form-label">Route (<span id="count">0</span> stops)</span>
+                    <div class="header-actions">
+                        <button id="add-day-btn" class="btn-text" title="Add a new day">
+                            <i class="bi bi-plus-circle" aria-hidden="true"></i> Add Day
+                        </button>
+                        <button id="clear-btn" class="btn-text text-danger" title="Clear all stops">
+                            <i class="bi bi-trash" aria-hidden="true"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="route-list" class="route-list"></div>
+            </div>
+
+            <div class="route-list-container hidden" id="timeline-view">
+                <div class="list-header">
+                    <span class="form-label">Timeline</span>
+                </div>
+                <div id="timeline-content" class="timeline-content"></div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="action-buttons">
+                    <button id="optimize-btn" class="btn btn-accent btn-full">
+                        <i class="bi bi-magic" aria-hidden="true"></i> Optimize Route
+                    </button>
+
+                    <div class="button-group">
+                        <button id="save-trip-btn" class="btn btn-primary">
+                            <i class="bi bi-cloud-upload" aria-hidden="true"></i> Save Trip
+                        </button>
+                        <button id="export-btn" class="btn btn-outline">
+                            <i class="bi bi-download" aria-hidden="true"></i> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<!-- Stop Details Modal -->
+<div class="modal" id="stop-modal" role="dialog" aria-modal="true" aria-labelledby="stop-modal-title"
+    aria-hidden="true">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="stop-modal-title">Stop Details</h3>
+            <button class="modal-close" aria-label="Close modal">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label" for="stop-name">Location Name</label>
+                <input type="text" id="stop-name" class="form-control" placeholder="e.g., Eiffel Tower">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="stop-type">Stop Type</label>
+                <select id="stop-type" class="form-control form-select">
+                    <option value="attraction">Attraction</option>
+                    <option value="hotel">Hotel/Accommodation</option>
+                    <option value="restaurant">Restaurant</option>
+                    <option value="viewpoint">Viewpoint</option>
+                    <option value="gas">Gas Station</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="stop-arrival">Arrival Time</label>
+                    <input type="time" id="stop-arrival" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="stop-duration">Duration (hours)</label>
+                    <input type="number" id="stop-duration" class="form-control" min="0" step="0.5" value="1">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="stop-notes">Notes</label>
+                <textarea id="stop-notes" class="form-control" rows="3"
+                    placeholder="Add notes: opening hours, booking confirmations, tips..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="stop-budget">Budget (USD)</label>
+                <input type="number" id="stop-budget" class="form-control" min="0" step="1" placeholder="0">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancel-stop">Cancel</button>
+            <button class="btn btn-primary" id="save-stop">Save Stop</button>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal" id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title"
+    aria-hidden="true">
+    <div class="modal-overlay"></div>
+    <div class="modal-content modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title" id="export-modal-title">Export Trip</h3>
+            <button class="modal-close" aria-label="Close modal">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <button class="export-option" data-format="pdf">
+                <i class="bi bi-file-pdf-fill" aria-hidden="true"></i>
+                <div>
+                    <strong>PDF Document</strong>
+                    <small>Detailed itinerary with maps</small>
+                </div>
+            </button>
+            <button class="export-option" data-format="json">
+                <i class="bi bi-file-earmark-code-fill" aria-hidden="true"></i>
+                <div>
+                    <strong>JSON Data</strong>
+                    <small>Import to other apps</small>
+                </div>
+            </button>
+            <button class="export-option" data-format="calendar">
+                <i class="bi bi-calendar-plus-fill" aria-hidden="true"></i>
+                <div>
+                    <strong>Calendar (.ics)</strong>
+                    <small>Add to Google/Apple Calendar</small>
+                </div>
+            </button>
+            <button class="export-option" data-format="share">
+                <i class="bi bi-share-fill" aria-hidden="true"></i>
+                <div>
+                    <strong>Share Link</strong>
+                    <small>Share with travel companions</small>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Transport Comparison Modal -->
+<div class="modal" id="transport-modal" role="dialog" aria-modal="true" aria-labelledby="transport-modal-title"
+    aria-hidden="true">
+    <div class="modal-overlay"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title" id="transport-modal-title">
+                <i class="bi bi-shuffle" aria-hidden="true"></i> Compare Transport Options
+            </h3>
+            <button class="modal-close" aria-label="Close modal">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="transport-comparison">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="loading-overlay" id="loading-overlay" role="status" aria-live="polite">
+    <div class="spinner"></div>
+    <p>Planning your perfect route...</p>
+</div>
+
+<!-- Custom Confirmation Dialog -->
+<div class="confirm-dialog-overlay" id="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="confirm-dialog">
+        <div class="confirm-icon" id="confirm-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <h3 class="confirm-title" id="confirm-title">Confirm Action</h3>
+        <p class="confirm-message" id="confirm-message">Are you sure you want to proceed?</p>
+        <div class="confirm-actions">
+            <button class="btn btn-outline" id="confirm-cancel">Cancel</button>
+            <button class="btn btn-danger" id="confirm-ok">Confirm</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<!-- CRITICAL: Leaflet JavaScript MUST load before script.js -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!-- Other required libraries -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Trip Editor - Load existing trip data -->
+<script src="{{ url_for('static', filename='trip_editor.js') }}"></script>
+{% endblock %}

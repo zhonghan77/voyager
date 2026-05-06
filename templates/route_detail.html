@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+
+<!-- Page Title Block -->
+{% block title %}{{ trip.name }} | Voyager{% endblock %}
+
+
+{% block head_extra %}
+<!-- Leaflet Map Library for Interactive Route Visualization -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Inject Trip Data into JavaScript Global Scope -->
+<!-- Used by map initialization script to render route and stops -->
+<script>
+    window.featuredRouteTripData = {{ trip | tojson | safe }};
+    console.log('[Route Detail] Trip data loaded:', window.featuredRouteTripData);
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- ROUTE HEADER SECTION -->
+<!-- Hero banner showing trip name, visibility status, and author info -->
+<header class="route-header">
+    <div class="hero-overlay"></div>
+    <div class="container route-header-content">
+        <!-- Visibility Badge (Public/Private) -->
+        <div class="route-badges">
+            {% if trip.is_public %}
+            <span class="badge"><i class="bi bi-globe"></i> Public Route</span>
+            {% else %}
+            <span class="badge"><i class="bi bi-lock-fill"></i> Private Trip</span>
+            {% endif %}
+        </div>
+
+        <!-- Trip Title -->
+        <h1 class="route-title">{{ trip.name }}</h1>
+
+        <!-- Trip Metadata (Creation Date and Author) -->
+        <div class="route-header-meta">
+            <!-- Creation Date -->
+            <div class="meta-item">
+                <i class="bi bi-calendar3"></i>
+                {{ trip.created_at if trip.created_at else 'Recently' }}
+            </div>
+
+            <span class="separator">&bull;</span>
+
+            <!-- Author Information -->
+            <!-- Displays different avatar/name based on trip type -->
+            <div class="author-pill">
+                {% if is_featured %}
+                <!-- Featured Route by Voyager -->
+                <div class="author-avatar-placeholder">
+                    <i class="bi bi-compass-fill"></i>
+                </div>
+                <span>Voyager Official</span>
+
+                {% elif trip_author %}
+                <!-- User-created Route with Author Info -->
+                <img src="{{ trip_author.avatar }}" alt="{{ trip_author.username }}">
+                <span>{{ trip_author.username }}</span>
+
+                {% elif current_user.is_authenticated %}
+                <!-- Current User's Own Trip -->
+                <img src="{{ current_user.avatar }}" alt="{{ current_user.username }}">
+                <span>{{ current_user.username }}</span>
+
+                {% else %}
+                <!-- Fallback for Unauthenticated Users -->
+                <div class="author-avatar-placeholder">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <span>Voyager User</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN CONTENT SECTION -->
+<main class="route-main">
+    <!-- ROUTE STATISTICS BAR -->
+    <!-- Shows key trip metrics: days, stops, transport mode, duration -->
+    <div class="container route-stats-container">
+        <div class="route-stats-bar">
+            <!-- Total Days Stat -->
+            <div class="stat-box">
+                <div class="stat-value">{{ trip.days|length }}</div>
+                <div class="stat-label"><i class="bi bi-calendar-event"></i> Days</div>
+            </div>
+
+            <!-- Total Stops Stat -->
+            <div class="stat-box">
+                <div class="stat-value">{{ total_stops }}</div>
+                <div class="stat-label"><i class="bi bi-geo-alt-fill"></i> Total Stops</div>
+            </div>
+
+            <!-- Transport Mode Stat -->
+            <div class="stat-box">
+                <div class="stat-value">
+                    {% if trip.transport_mode == 'driving-car' %}
+                    <i class="bi bi-car-front-fill"></i>
+                    {% elif trip.transport_mode == 'cycling-regular' %}
+                    <i class="bi bi-bicycle"></i>
+                    {% elif trip.transport_mode == 'foot-walking' %}
+                    <i class="bi bi-person-walking"></i>
+                    {% else %}
+                    <i class="bi bi-person-walking"></i> {% endif %}
+                </div>
+                <div class="stat-label">Mode</div>
+            </div>
+
+            <!-- Estimated Duration (if available) -->
+            {% if trip.estimated_duration %}
+            <div class="stat-box">
+                <div class="stat-value stat-time"><i class="bi bi-clock"></i></div>
+                <div class="stat-label">{{ trip.estimated_duration }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- INTERACTIVE MAP CONTAINER -->
+        <!-- Populated by JavaScript using Leaflet library -->
+        <div id="route-map"></div>
+
+        <!-- ITINERARY SECTION HEADER -->
+        <div class="section-header itinerary-header">
+            <h2>Detailed Itinerary</h2>
+            <p class="subtitle">Your day-by-day travel plan with insider tips</p>
+        </div>
+
+        <!-- ITINERARY TIMELINE -->
+        <!-- Shows all days and stops with routing information -->
+        <div class="itinerary-container">
+            {% for day in trip.days %}
+            <!-- DAY CARD -->
+            <div class="day-card">
+                <!-- Day Header (Day Number and Stop Count) -->
+                <div class="day-card-header">
+                    <div class="day-title-wrapper">
+                        <h3><i class="bi bi-calendar-day"></i> Day {{ day.number }}</h3>
+                        <span class="day-stop-count">{{ day.stops|length }} stops</span>
+                    </div>
+                </div>
+
+                <!-- Day Stops Timeline -->
+                <div class="day-card-body">
+                    {% if day.stops %}
+                    <div class="route-timeline">
+                        {% for stop in day.stops %}
+
+                        <!-- TRAVEL SEGMENT CONNECTOR -->
+                        <!-- Shows distance and duration between consecutive stops -->
+                        {% if not loop.first and stop.routeFromPrevious %}
+                        <div class="route-connector-info">
+                            <div class="travel-segment-badge">
+                                <!-- Transport Mode Icon -->
+                                <div class="segment-icon">
+                                    {% if trip.transport_mode == 'cycling-regular' %}
+                                    <i class="bi bi-bicycle"></i>
+                                    {% elif trip.transport_mode == 'foot-walking' %}
+                                    <i class="bi bi-person-walking"></i>
+                                    {% else %}
+                                    <i class="bi bi-car-front"></i>
+                                    {% endif %}
+                                </div>
+                                <!-- Distance and Time Information -->
+                                <div class="segment-text">
+                                    <span class="segment-dist">{{ stop.routeFromPrevious.distance|round(1) }} km</span>
+                                    <span class="segment-time">
+                                        {% set total_mins = stop.routeFromPrevious.duration|round(0)|int %}
+                                        {% if total_mins >= 60 %}
+                                        {{ (total_mins // 60) }}h {{ (total_mins % 60) }}m
+                                        {% else %}
+                                        {{ total_mins }}m
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- INDIVIDUAL STOP ITEM -->
+                        <div class="route-stop-item">
+                            <!-- Stop Number Marker with Connector Line -->
+                            <div class="stop-marker-wrapper">
+                                <div class="stop-marker">{{ loop.index }}</div>
+                                {% if not loop.last %}
+                                <div class="stop-connector-line"></div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Stop Content Details -->
+                            <div class="stop-content">
+                                <!-- Stop Name and Type Badge -->
+                                <div class="stop-header-row">
+                                    <h4>{{ stop.name }}</h4>
+                                    <span class="badge-type {{ stop.type }}">
+                                        {% if stop.type == 'attraction' %}ATTRACTION
+                                        {% elif stop.type == 'hotel' %}HOTEL
+                                        {% elif stop.type == 'restaurant' %}DINING
+                                        {% else %}{{ stop.type|upper }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+
+                                <!-- Stop Description (if available) -->
+                                {% if stop.description %}
+                                <p class="stop-description">{{ stop.description }}</p>
+                                {% endif %}
+
+                                <!-- Stop Address -->
+                                {% if stop.address %}
+                                <div class="stop-address">
+                                    <i class="bi bi-geo-alt"></i> {{ stop.address }}
+                                </div>
+                                {% endif %}
+
+                                <!-- Additional Stop Details Grid -->
+                                <div class="stop-detail-grid">
+                                    <!-- Recommended Duration -->
+                                    {% if stop.recommended_duration %}
+                                    <div class="detail-item">
+                                        <i class="bi bi-hourglass-split"></i>
+                                        <span>{{ stop.recommended_duration }}</span>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Entry Fee (if applicable) -->
+                                    {% if stop.entry_fee %}
+                                    <div class="detail-item">
+                                        <i class="bi bi-currency-dollar"></i>
+                                        <span>{{ stop.entry_fee }}</span>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Opening Hours -->
+                                    {% if stop.opening_hours %}
+                                    <div class="detail-item">
+                                        <i class="bi bi-clock"></i>
+                                        <span>{{ stop.opening_hours }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Insider Tips Section (if available) -->
+                                {% if stop.insider_tips %}
+                                <div class="insider-tips">
+                                    <div class="tips-header">
+                                        <i class="bi bi-lightbulb-fill"></i>
+                                        <strong>Insider Tips</strong>
+                                    </div>
+                                    <p>{{ stop.insider_tips }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <!-- Empty Day Message -->
+                    <p class="no-stops-message">
+                        <i class="bi bi-info-circle"></i> No stops planned for this day.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- ACTION BUTTONS ROW -->
+        <!-- Operation buttons: Share, Delete, Public/Private toggle, Edit in Planner -->
+        <!-- ACTION BUTTONS ROW -->
+        {% if current_user.is_authenticated %}
+        {% set is_owner = (not is_featured and current_user.id == (trip_author.id if trip_author else trip.get('user_id'))) %}
+        
+        {% if is_owner or current_user.is_admin %}
+        <div class="action-buttons-row">
+            <!-- Share Button -->
+            <button class="btn btn-outline js-share-btn" data-trip-id="{{ trip.id }}" title="Share this trip">
+                <i class="bi bi-share-fill"></i> Share
+            </button>
+        
+            {% if is_owner %}
+            <!-- Edit in Planner Button -->
+            <button class="btn btn-primary" onclick="editTripInPlanner({{ trip.id }})" title="Edit this trip in planner">
+                <i class="bi bi-pencil-square"></i> Edit in Planner
+            </button>
+        
+            <!-- Public/Private Toggle Button - 仅所有者 -->
+            <button class="btn btn-outline" id="toggle-public-btn"
+                onclick="toggleTripPublic({{ trip.id }}, {{ 'true' if trip.is_public else 'false' }})"
+                title="Toggle trip visibility">
+                {% if trip.is_public %}
+                <i class="bi bi-lock-fill"></i> Make Private
+                {% else %}
+                <i class="bi bi-globe"></i> Make Public
+                {% endif %}
+            </button>
+        
+            <!-- Delete Button  -->
+            <button class="btn btn-outline-danger" onclick="deleteTrip({{ trip.id }}, event)" title="Delete this trip">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+            {% endif %}
+        
+            {% if current_user.is_admin and not is_owner %}
+            <!-- Admin Delete Button -->
+            <button class="btn btn-outline-danger" onclick="deleteTrip({{ trip.id }}, event)" title="Delete this trip (Admin)">
+                <i class="bi bi-shield-fill"></i>
+                <i class="bi bi-trash"></i> Admin Delete
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <!-- REVIEWS & RATINGS SECTION -->
+        <!-- Only shown for public trips -->
+        {% if trip.is_public %}
+        <section class="reviews-section" id="trip-reviews-section">
+            <!-- Section Header -->
+            <div class="section-header">
+                <h2><i class="bi bi-chat-left-text"></i> Reviews & Ratings</h2>
+                <p class="subtitle">Share your experience and read what others say</p>
+            </div>
+
+            <!-- REVIEW SUBMISSION FORM -->
+            <!-- Only visible to authenticated users -->
+            {% if current_user.is_authenticated %}
+            <div class="review-form-container">
+                <h3>Write a Review</h3>
+                <form action="/submit_trip_review/{{ trip.id }}" method="POST" id="trip-review-form" novalidate>
+                    <!-- Star Rating Input -->
+                    <div class="form-group">
+                        <label>Your Rating</label>
+                        <div class="rating-input">
+                            <!-- 5-Star Rating System (reversed for CSS styling) -->
+                            <input type="radio" name="rating" id="trip-star5" value="5" required>
+                            <label for="trip-star5" title="5 stars">
+                                <span class="visually-hidden">5 Stars</span>
+                                <i class="bi bi-star-fill"></i>
+                            </label>
+
+                            <input type="radio" name="rating" id="trip-star4" value="4">
+                            <label for="trip-star4" title="4 stars">
+                                <span class="visually-hidden">4 Stars</span>
+                                <i class="bi bi-star-fill"></i>
+                            </label>
+
+                            <input type="radio" name="rating" id="trip-star3" value="3">
+                            <label for="trip-star3" title="3 stars">
+                                <span class="visually-hidden">3 Stars</span>
+                                <i class="bi bi-star-fill"></i>
+                            </label>
+
+                            <input type="radio" name="rating" id="trip-star2" value="2">
+                            <label for="trip-star2" title="2 stars">
+                                <span class="visually-hidden">2 Stars</span>
+                                <i class="bi bi-star-fill"></i>
+                            </label>
+
+                            <input type="radio" name="rating" id="trip-star1" value="1">
+                            <label for="trip-star1" title="1 star">
+                                <span class="visually-hidden">1 Star</span>
+                                <i class="bi bi-star-fill"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Comment Text Area -->
+                    <div class="form-group">
+                        <label for="trip-comment">Your Review (Optional)</label>
+                        <textarea name="comment" id="trip-comment" rows="4" class="form-control"
+                            placeholder="Share your experience with this trip..." maxlength="500"></textarea>
+                        <small class="form-text">Maximum 500 characters</small>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Submit Review
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <!-- Login Prompt for Guest Users -->
+            <div class="login-prompt">
+                <p><i class="bi bi-info-circle"></i> Please <a href="/login">log in</a> to write a review.</p>
+            </div>
+            {% endif %}
+
+            <!-- EXISTING REVIEWS LIST -->
+            <div class="reviews-list">
+                {% if reviews %}
+                {% for review in reviews %}
+                <!-- Individual Review Card -->
+                <div class="review-card" id="trip-review-{{ review.id }}">
+                    <div class="review-header">
+                        <!-- Reviewer Information -->
+                        <div class="reviewer-info">
+                            <img src="{{ review.user.avatar }}?v={{ cache_buster }}" alt="{{ review.user.username }}"
+                                class="reviewer-avatar">
+                            <div>
+                                <h4 class="reviewer-name">{{ review.user.username }}</h4>
+                                <p class="review-date">{{ review.created_at.strftime('%B %d, %Y') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Rating and Action Buttons -->
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <!-- Star Rating Display -->
+                            <div class="review-rating">
+                                {% for i in range(5) %}
+                                {% if i < review.rating %} <i class="bi bi-star-fill"></i>
+                                    {% else %}
+                                    <i class="bi bi-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                            </div>
+
+                            <!-- Action Buttons (Edit/Delete) -->
+                            <!-- Different permissions based on user role -->
+                            {% if current_user.is_authenticated %}
+                            {% if review.user_id == current_user.id %}
+                            <!-- Review Author: Can Edit and Delete -->
+                            <button class="btn btn-sm btn-outline btn-text js-edit-trip-review-btn"
+                                data-id="{{ review.id }}" data-rating="{{ review.rating }}"
+                                data-comment="{{ review.comment | escape }}" title="Edit your review">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-text js-delete-review-btn"
+                                data-id="{{ review.id }}" data-type="trip" title="Delete your review">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                            {% elif trip.user_id == current_user.id %}
+                            <!-- Trip Author: Can Delete Reviews -->
+                            <span class="badge badge-trip-author">
+                                <i class="bi bi-person-fill"></i> Trip Author
+                            </span>
+                            <button class="btn btn-sm btn-outline-danger btn-text js-delete-review-btn"
+                                data-id="{{ review.id }}" data-type="trip" title="Delete review (Trip Author)">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                            {% elif current_user.is_admin %}
+                            <!-- Admin: Can Delete Any Review -->
+                            <span class="badge badge-admin">
+                                <i class="bi bi-shield-fill"></i> Admin
+                            </span>
+                            <button class="btn btn-sm btn-outline-danger btn-text js-delete-review-btn"
+                                data-id="{{ review.id }}" data-type="trip" title="Delete review (Admin)">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Review Comment Text -->
+                    {% if review.comment %}
+                    <p class="review-text">{{ review.comment }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <!-- Empty State: No Reviews Yet -->
+                <div class="no-reviews">
+                    <i class="bi bi-chat-left-text"></i>
+                    <p>No reviews yet. Be the first to share your experience!</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</main>
+
+<!-- EDIT REVIEW MODAL -->
+<!-- Allows users to modify their existing reviews -->
+<div class="modal" id="edit-trip-review-modal" role="dialog" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <h3>Edit Your Review</h3>
+            <button class="modal-close" id="close-edit-trip-review-modal" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body with Edit Form -->
+        <div class="modal-body">
+            <form id="edit-trip-review-form" method="POST" action="">
+                <!-- Rating Update -->
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="rating-input">
+                        <!-- 5-Star Rating System -->
+                        <input type="radio" name="rating" id="edit-trip-star5" value="5">
+                        <label for="edit-trip-star5" title="5 stars">
+                            <span class="visually-hidden">5 Stars</span>
+                            <i class="bi bi-star-fill"></i>
+                        </label>
+
+                        <input type="radio" name="rating" id="edit-trip-star4" value="4">
+                        <label for="edit-trip-star4" title="4 stars">
+                            <span class="visually-hidden">4 Stars</span>
+                            <i class="bi bi-star-fill"></i>
+                        </label>
+
+                        <input type="radio" name="rating" id="edit-trip-star3" value="3">
+                        <label for="edit-trip-star3" title="3 stars">
+                            <span class="visually-hidden">3 Stars</span>
+                            <i class="bi bi-star-fill"></i>
+                        </label>
+
+                        <input type="radio" name="rating" id="edit-trip-star2" value="2">
+                        <label for="edit-trip-star2" title="2 stars">
+                            <span class="visually-hidden">2 Stars</span>
+                            <i class="bi bi-star-fill"></i>
+                        </label>
+
+                        <input type="radio" name="rating" id="edit-trip-star1" value="1">
+                        <label for="edit-trip-star1" title="1 star">
+                            <span class="visually-hidden">1 Star</span>
+                            <i class="bi bi-star-fill"></i>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Comment Update -->
+                <div class="form-group">
+                    <label for="edit-trip-comment">Comment</label>
+                    <textarea name="comment" id="edit-trip-comment" class="form-control" rows="4"></textarea>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="cancel-edit-trip-review">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- SHARE MODAL -->
+<!-- Modal for sharing the trip via various platforms -->
+<div class="modal" id="share-modal" role="dialog" aria-hidden="true" aria-labelledby="share-modal-title">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <h3 id="share-modal-title">
+                <i class="bi bi-share-fill"></i> Share This Trip
+            </h3>
+            <button class="modal-close" aria-label="Close share modal">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body">
+            <p class="text-center text-muted mb-4">
+                Share this amazing trip with your friends and family!
+            </p>
+
+            <!-- Share Options Grid -->
+            <div class="share-options">
+                <!-- Copy Link -->
+                <button class="share-btn" data-share="link" aria-label="Copy link to clipboard">
+                    <i class="bi bi-link-45deg"></i>
+                    <span>Copy Link</span>
+                </button>
+
+                <!-- Facebook -->
+                <button class="share-btn" data-share="facebook" aria-label="Share on Facebook">
+                    <i class="bi bi-facebook"></i>
+                    <span>Facebook</span>
+                </button>
+
+                <!-- Twitter -->
+                <button class="share-btn" data-share="twitter" aria-label="Share on Twitter">
+                    <i class="bi bi-twitter"></i>
+                    <span>Twitter</span>
+                </button>
+
+                <!-- Email -->
+                <button class="share-btn" data-share="email" aria-label="Share via email">
+                    <i class="bi bi-envelope-fill"></i>
+                    <span>Email</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

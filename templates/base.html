@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Page Title Block - Child templates can override -->
+    <title>{% block title %}Voyager - Intelligent Travel Planning{% endblock %}</title>
+
+    <!-- Meta Description Block -->
+    <meta name="description" content="{% block meta_description %}Plan your perfect trip with Voyager.{% endblock %}">
+    {% block meta_tags %}{% endblock %}
+
+    <!-- External CSS Libraries -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom Application Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Extra Head Content Block for Page-Specific Resources -->
+    {% block head_extra %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+    <!-- MAIN NAVIGATION BAR -->
+    <nav class="navbar" role="navigation" aria-label="Main Navigation">
+        <div class="container nav-container">
+            <!-- Brand Logo -->
+            <a href="/" class="logo" aria-label="Voyager Home">
+                <i class="bi bi-compass-fill" aria-hidden="true"></i> Voyager
+            </a>
+
+            <!-- Navigation Links -->
+            <ul class="nav-links" role="menubar" id="nav-links">
+                <li role="none"><a href="/" role="menuitem">Home</a></li>
+                <li role="none"><a href="/destinations" role="menuitem">Destinations</a></li>
+                <li role="none"><a href="/community" role="menuitem">Community</a></li>
+                <li role="none">
+                    <a href="/planner" role="menuitem"
+                        class="{% if request.path.startswith('/planner') %}active{% endif %}">Trip Planner</a>
+                </li>
+
+                <!-- Authenticated User Menu Items -->
+                {% if current_user.is_authenticated %}
+                <!-- Admin Panel Link (Only for admin users) -->
+                {% if current_user.is_admin %}
+                <li role="none">
+                    <a href="/admin" role="menuitem" class="admin-link" title="Admin Panel">
+                        <i class="bi bi-shield-lock-fill"></i> Admin
+                    </a>
+                </li>
+                {% endif %}
+                <!-- User Profile Avatar -->
+                <li role="none">
+                    <a href="/profile" class="user-capsule" title="Go to Profile" role="menuitem"
+                        aria-label="View your profile">
+                        <img src="{{ current_user.avatar }}?v={{ cache_buster }}"
+                            alt="{{ current_user.username }}'s avatar">
+                    </a>
+                </li>
+                {% else %}
+                <!-- Guest User Menu Items -->
+                <li role="none"><a href="/login" style="margin-right: 10px;" role="menuitem">Login</a></li>
+                <li role="none">
+                    <a href="/register" class="btn btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.95rem;"
+                        role="menuitem">
+                        Sign Up
+                    </a>
+                </li>
+                {% endif %}
+
+            </ul>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button class="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false"
+                aria-controls="nav-links">
+                <i class="bi bi-list" aria-hidden="true"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay (Dark background when menu is open) -->
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+
+    <!-- Flash Messages Display -->
+    <!-- Shows success, error, warning, and info messages from Flask's flash() -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div id="flash-wrapper" class="container" style="margin-top: 2rem; margin-bottom: 1rem;">
+        <div class="alert-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade-in" role="alert">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bi bi-exclamation-circle-fill"></i> {{ message }}
+                </div>
+                <button type="button" class="btn-close" aria-label="Close" onclick="dismissAlert(this)">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Alert Dismissal Script -->
+    <script>
+        function dismissAlert(button) {
+            const alertNode = button.closest('.alert');
+            const alertContainer = button.closest('.alert-container');
+            const wrapper = document.getElementById('flash-wrapper');
+
+            if (alertNode) {
+                alertNode.remove();
+            }
+
+            if (alertContainer && alertContainer.children.length === 0) {
+                if (wrapper) {
+                    wrapper.style.display = 'none';
+                }
+            }
+        }
+    </script>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Page-Specific Content Block -->
+    <!-- Child templates inject their main content here -->
+    {% block content %}{% endblock %}
+
+    <!-- Custom Confirmation Dialog -->
+    <!-- Used for confirming destructive actions like delete -->
+    <div class="custom-confirm-overlay" id="custom-confirm-dialog" style="display: none;">
+        <div class="custom-confirm-dialog">
+            <div class="custom-confirm-icon" id="custom-confirm-icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h3 class="custom-confirm-title" id="custom-confirm-title">Confirm Action</h3>
+            <p class="custom-confirm-message" id="custom-confirm-message">Are you sure?</p>
+            <div class="custom-confirm-actions">
+                <button class="btn btn-outline" id="custom-confirm-cancel">Cancel</button>
+                <button class="btn btn-danger" id="custom-confirm-ok">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER SECTION -->
+    {% block footer %}
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <!-- Footer Top Section with 4 Columns -->
+            <div class="footer-top">
+                <!-- Brand Column -->
+                <div class="footer-col brand-col">
+                    <div class="footer-logo">
+                        <i class="bi bi-compass-fill"></i> Voyager
+                    </div>
+                    <p class="footer-desc">
+                        Discover the world with intelligent planning. We curate the best routes, hidden gems, and travel
+                        insights for the modern explorer.
+                    </p>
+                    <!-- Social Media Links -->
+                    <div class="social-links">
+                        <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+
+                <!-- Product Links Column -->
+                <div class="footer-col">
+                    <h5 class="footer-heading">Product</h5>
+                    <ul class="footer-nav-list">
+                        <li><a href="/destinations">Destinations</a></li>
+                        <li><a href="/planner">Trip Planner</a></li>
+                        <li><a href="/community">Community Reviews</a></li>
+                        <li><a href="#">Mobile App <span class="badge badge-sm">New</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- Company Links Column -->
+                <div class="footer-col">
+                    <h5 class="footer-heading">Company</h5>
+                    <ul class="footer-nav-list">
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/careers">Careers</a></li>
+                        <li><a href="/blog">Travel Blog</a></li>
+                        <li><a href="/contact">Contact Support</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter Subscription Column -->
+                <div class="footer-col newsletter-col">
+                    <h5 class="footer-heading">Stay Updated</h5>
+                    <p>Get the latest travel trends and exclusive offers sent to your inbox.</p>
+
+                    <form class="footer-newsletter" action="#" method="POST" onsubmit="event.preventDefault();">
+                        <div class="input-group">
+                            <label for="newsletter-email" class="visually-hidden">Email Address</label>
+
+                            <input type="email" id="newsletter-email" placeholder="Enter your email" required
+                                class="form-control" aria-label="Email Address for newsletter">
+
+                            <button type="submit" class="btn btn-primary btn-icon-only"
+                                aria-label="Subscribe to newsletter">
+                                <i class="bi bi-send-fill" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">We respect your privacy. Unsubscribe anytime.</small>
+                    </form>
+                </div>
+            </div>
+
+            <hr class="footer-divider">
+
+            <!-- Footer Bottom Section with Copyright and Legal Links -->
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy;
+                    <script>document.write(new Date().getFullYear())</script> Voyager Inc. All rights reserved.
+                </div>
+                <div class="legal-links">
+                    <a href="/privacy">Privacy Policy</a>
+                    <a href="/terms">Terms of Service</a>
+                    <a href="/sitemap">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- Toast Notification Container -->
+    <!-- For displaying temporary notifications (success, error, info) -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Main Application JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- Extra Scripts Block for Page-Specific JavaScript -->
+    {% block scripts_extra %}{% endblock %}
+</body>
+
+</html>
